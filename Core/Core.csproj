@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Pieces\" />
     <Folder Include="Board\" />
     <Folder Include="Moves\" />
   </ItemGroup>
