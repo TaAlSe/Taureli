@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="Core/Core.csproj" />
   <Project Path="Data/Data.csproj" />
+  <Project Path="Demo/Demo.csproj" Id="c993de9a-833a-4fac-9141-8da70ab4c0da" />
   <Project Path="Tests/Tests.csproj" Id="ff607c03-ec99-4d19-b779-06185bf5a89a" />
   <Project Path="UI/UI.csproj" />
 </Solution>
