@@ -7,6 +7,7 @@ using Core.Pieces;  // чтобы использовать Piece, PieceColor, Pi
 /// </summary>
 public class Board
 {
+    public const int Size = 8;
     private readonly Piece?[,] _squares;
 
     /// <summary>
@@ -14,7 +15,7 @@ public class Board
     /// </summary>
     public Board()
     {
-        _squares = new Piece?[8, 8];
+        _squares = new Piece?[Size, Size];
     }
 
     /// <summary>
@@ -25,13 +26,12 @@ public class Board
     /// <exception cref="ArgumentException">Если размеры массива не 8x8.</exception>
     public Board(Piece?[,] initialPosition) : this()
     {
-        if (initialPosition == null)
-            throw new ArgumentNullException(nameof(initialPosition));
-        if (initialPosition.GetLength(0) != 8 || initialPosition.GetLength(1) != 8)
+        ArgumentNullException.ThrowIfNull(initialPosition);
+        if (initialPosition.GetLength(0) != Size || initialPosition.GetLength(1) != Size)
             throw new ArgumentException("Массив должен быть размером 8x8", nameof(initialPosition));
 
-        for (int row = 0; row < 8; row++)
-            for (int col = 0; col < 8; col++)
+        for (int row = 0; row < _squares.GetLength(0); row++)
+            for (int col = 0; col < _squares.GetLength(1); col++)
                 _squares[row, col] = initialPosition[row, col];
     }
 
@@ -60,7 +60,7 @@ public class Board
     /// </summary>
     public static bool IsInside(int row, int col)
     {
-        return row >= 0 && row < 8 && col >= 0 && col < 8;
+        return row >= 0 && row < Size && col >= 0 && col < Size;
     }
 
     /// <summary>
@@ -68,9 +68,7 @@ public class Board
     /// </summary>
     public void Clear()
     {
-        for (int row = 0; row < 8; row++)
-            for (int col = 0; col < 8; col++)
-                _squares[row, col] = null;
+        Array.Clear(_squares, 0, _squares.Length);
     }
 
     /// <summary>
@@ -79,11 +77,11 @@ public class Board
     public override string ToString()
     {
         var sb = new System.Text.StringBuilder();
-        for (int row = 0; row < 8; row++)
+        for (int row = 0; row < Size; row++)
         {
             // Номер горизонтали (8 - row, чтобы 8 была внизу)
-            sb.Append(8 - row).Append("  ");
-            for (int col = 0; col < 8; col++)
+            sb.Append(Size - row).Append("  ");
+            for (int col = 0; col < Size; col++)
             {
                 var piece = _squares[row, col];
                 if (piece == null)
