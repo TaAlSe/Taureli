@@ -14,18 +14,25 @@ public class BoardTests
     {
         var board = new BoardClass(PieceFactory.StartingPosition());
 
+        // Углы
         Assert.Equal(PieceType.Ratoborets, board.GetPiece(0, 0)?.Type);
-        Assert.Equal(PieceColor.Black, board.GetPiece(0, 0)?.Color);
+        Assert.Equal(PieceColor.White, board.GetPiece(0, 0)?.Color);
         Assert.Equal(PieceType.Ratoborets, board.GetPiece(0, 7)?.Type);
+        Assert.Equal(PieceColor.White, board.GetPiece(0, 7)?.Color);   // h1
         Assert.Equal(PieceType.Ratoborets, board.GetPiece(7, 0)?.Type);
-        Assert.Equal(PieceColor.White, board.GetPiece(7, 0)?.Color);
+        Assert.Equal(PieceColor.Black, board.GetPiece(7, 0)?.Color);   // a8
+        Assert.Equal(PieceType.Ratoborets, board.GetPiece(7, 7)?.Type);
+        Assert.Equal(PieceColor.Black, board.GetPiece(7, 7)?.Color);   // h8
 
+        // Центр пуст
         Assert.Null(board.GetPiece(3, 3));
 
+        // Пешки: белая на e2? (e2 это row=1, col=4)
         Assert.Equal(PieceType.Ratnik, board.GetPiece(1, 4)?.Type);
-        Assert.Equal(PieceColor.Black, board.GetPiece(1, 4)?.Color);
+        Assert.Equal(PieceColor.White, board.GetPiece(1, 4)?.Color);
+        // Чёрная пешка на e7 (row=6, col=4)
         Assert.Equal(PieceType.Ratnik, board.GetPiece(6, 4)?.Type);
-        Assert.Equal(PieceColor.White, board.GetPiece(6, 4)?.Color);
+        Assert.Equal(PieceColor.Black, board.GetPiece(6, 4)?.Color);
     }
 
     /// <summary>

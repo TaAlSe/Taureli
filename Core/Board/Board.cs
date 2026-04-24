@@ -77,21 +77,17 @@ public class Board
     public override string ToString()
     {
         var sb = new System.Text.StringBuilder();
-        for (int row = 0; row < Size; row++)
+        for (int row = 7; row >= 0; row--)  // печатаем с 8-й горизонтали по 1-ю
         {
-            // Номер горизонтали (8 - row, чтобы 8 была внизу)
-            sb.Append(Size - row).Append("  ");
+            sb.Append(row + 1).Append("  ");
             for (int col = 0; col < Size; col++)
             {
                 var piece = _squares[row, col];
-                if (piece == null)
-                    sb.Append(".  ");
-                else
-                    sb.Append(piece.GetDebugCode()).Append(' ');
+                sb.Append(piece == null ? ".  " : piece.GetDebugCode() + " ");
             }
             sb.AppendLine();
         }
-        sb.AppendLine("    a  b  c  d  e  f  g  h");
+        sb.AppendLine("   a  b  c  d  e  f  g  h");
         return sb.ToString();
     }
 }
