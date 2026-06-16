@@ -1,5 +1,6 @@
 ﻿namespace Core.Board;
 
+using Core.Moves;
 using Core.Pieces;  // чтобы использовать Piece, PieceColor, PieceType
 
 /// <summary>
@@ -43,7 +44,7 @@ public class Board
     /// <returns>Фигура или null, если клетка пуста или координаты за пределами доски.</returns>
     public Piece? GetPiece(int row, int col)
     {
-        return IsInside(row, col) ? _squares[row, col] : null;
+        return new Position(row, col).IsValid ? _squares[row, col] : null;
     }
 
     /// <summary>
@@ -51,16 +52,8 @@ public class Board
     /// </summary>
     public void SetPiece(int row, int col, Piece? piece)
     {
-        if (IsInside(row, col))
+        if (new Position(row, col).IsValid)
             _squares[row, col] = piece;
-    }
-
-    /// <summary>
-    /// Проверяет, находятся ли координаты в пределах доски.
-    /// </summary>
-    public static bool IsInside(int row, int col)
-    {
-        return row >= 0 && row < Size && col >= 0 && col < Size;
     }
 
     /// <summary>

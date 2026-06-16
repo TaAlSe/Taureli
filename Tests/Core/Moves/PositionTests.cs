@@ -4,11 +4,16 @@ namespace Tests.Core.Moves;
 
 public class PositionTests
 {
+    /// <summary>
+    /// Проверяет, что метод FromAlgebraic корректно преобразует шахматную нотацию
+    /// в объект Position с правильными Row и Col, а ToAlgebraic возвращает исходную строку.
+    /// Тестируются: e2 -> (1,4), a1 -> (0,0), h8 -> (7,7).
+    /// </summary>
     [Fact]
     public void FromAlgebraic_ValidInput_ReturnsCorrectPosition()
     {
         var pos = Position.FromAlgebraic("e2");
-        Assert.Equal(1, pos.Row); // e2 -> row=1 (вторая горизонталь)
+        Assert.Equal(1, pos.Row);
         Assert.Equal(4, pos.Col);
         Assert.Equal("e2", pos.ToAlgebraic());
 
@@ -23,14 +28,21 @@ public class PositionTests
         Assert.Equal("h8", pos3.ToAlgebraic());
     }
 
+    /// <summary>
+    /// Проверяет, что метод FromAlgebraic выбрасывает ArgumentException
+    /// при передаче некорректных строк: неверная буква, неверная цифра, короткая строка.
+    /// </summary>
     [Fact]
-    public void FromAlgebraic_InvalidInput_Throws()
+    public void FromAlgebraic_InvalidInput_ThrowsException()
     {
         Assert.Throws<ArgumentException>(() => Position.FromAlgebraic("z9"));
         Assert.Throws<ArgumentException>(() => Position.FromAlgebraic("a0"));
         Assert.Throws<ArgumentException>(() => Position.FromAlgebraic("e"));
     }
 
+    /// <summary>
+    /// Проверяет, что свойство IsValid возвращает true для координат внутри доски (0..7).
+    /// </summary>
     [Fact]
     public void IsValid_ValidCoordinates_ReturnsTrue()
     {
@@ -38,6 +50,9 @@ public class PositionTests
         Assert.True(new Position(7, 7).IsValid);
     }
 
+    /// <summary>
+    /// Проверяет, что свойство IsValid возвращает false для координат вне доски (отрицательные или >=8).
+    /// </summary>
     [Fact]
     public void IsValid_InvalidCoordinates_ReturnsFalse()
     {

@@ -5,6 +5,10 @@ namespace Tests.Core.Moves;
 
 public class MoveTests
 {
+    /// <summary>
+    /// Проверяет, что конструктор Move сохраняет переданные позиции From и To,
+    /// а поле PromotionType по умолчанию равно null.
+    /// </summary>
     [Fact]
     public void Move_StoresCorrectPositions()
     {
@@ -17,6 +21,9 @@ public class MoveTests
         Assert.Null(move.PromotionType);
     }
 
+    /// <summary>
+    /// Проверяет, что при создании хода с указанием PromotionType это значение сохраняется.
+    /// </summary>
     [Fact]
     public void Move_WithPromotion_StoresPromotionType()
     {
