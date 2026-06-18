@@ -20,3 +20,10 @@ Console.WriteLine($"Ход с превращением: {promotionMove.From} -> 
 var board = new ChessBoard(PieceFactory.StartingPosition());
 Console.WriteLine("\n=== Доска ===");
 Console.WriteLine(board.ToString());
+
+Console.WriteLine("\n=== Генератор ходов ладьи ===");
+var rookBoard = new ChessBoard();
+rookBoard.SetPiece(3, 3, new Piece(PieceType.Ratoborets, PieceColor.White));
+var rookMoves = RookMoveGenerator.GetMoves(rookBoard, new Position(3, 3));
+Console.WriteLine($"Ладья на d4 может пойти на {rookMoves.Count} клеток:");
+Console.WriteLine(string.Join(", ", rookMoves.Select(p => p.ToAlgebraic())));

@@ -18,8 +18,8 @@ public class RookMoveGeneratorTests
 
         var moves = RookMoveGenerator.GetMoves(board, new Position(3, 3));
 
-        // Ожидаем 7+7+7+7 = 28 ходов (все клетки в ряду и колонке, кроме своей)
-        Assert.Equal(14, moves.Count); // по 7 в каждом направлении, всего 4 направления = 28, но у нас row=3, col=3 -> вверх 4 клетки (4,5,6,7), вниз 3 (2,1,0), вправо 4 (4,5,6,7), влево 3 (2,1,0) -> 4+3+4+3=14
+        // Ожидаем 14 ходов: 4 вверх + 3 вниз + 4 вправо + 3 влево
+        Assert.Equal(14, moves.Count);
         // Проверим наличие некоторых: например, (3,7) и (3,0)
         Assert.Contains(new Position(3, 7), moves);
         Assert.Contains(new Position(3, 0), moves);
