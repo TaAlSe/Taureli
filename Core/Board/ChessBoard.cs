@@ -1,12 +1,12 @@
-﻿namespace Core.Board;
-
-using Core.Moves;
+﻿using Core.Moves;
 using Core.Pieces;  // чтобы использовать Piece, PieceColor, PieceType
+
+namespace Core.Board;
 
 /// <summary>
 /// Представляет шахматную доску 8x8 для таврелей.
 /// </summary>
-public class Board
+public class ChessBoard
 {
     public const int Size = 8;
     private readonly Piece?[,] _squares;
@@ -14,7 +14,7 @@ public class Board
     /// <summary>
     /// Создаёт пустую доску (все клетки null).
     /// </summary>
-    public Board()
+    public ChessBoard()
     {
         _squares = new Piece?[Size, Size];
     }
@@ -25,7 +25,7 @@ public class Board
     /// <param name="initialPosition">Двумерный массив 8x8 с фигурами (может содержать null).</param>
     /// <exception cref="ArgumentNullException">Если initialPosition == null.</exception>
     /// <exception cref="ArgumentException">Если размеры массива не 8x8.</exception>
-    public Board(Piece?[,] initialPosition) : this()
+    public ChessBoard(Piece?[,] initialPosition) : this()
     {
         ArgumentNullException.ThrowIfNull(initialPosition);
         if (initialPosition.GetLength(0) != Size || initialPosition.GetLength(1) != Size)

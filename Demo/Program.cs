@@ -17,6 +17,6 @@ var promotionMove = new Move(from, to, PieceType.Helgi);
 Console.WriteLine($"Ход с превращением: {promotionMove.From} -> {promotionMove.To}, в {promotionMove.PromotionType}");
 
 // Можно также показать доску (уже есть)
-var board = new Board(PieceFactory.StartingPosition());
+var board = new ChessBoard(PieceFactory.StartingPosition());
 Console.WriteLine("\n=== Доска ===");
 Console.WriteLine(board.ToString());

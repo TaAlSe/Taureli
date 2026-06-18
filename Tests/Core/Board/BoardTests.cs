@@ -1,5 +1,5 @@
 ﻿using Core.Pieces;
-using BoardClass = Core.Board.Board;
+using Core.Board;
 
 namespace Tests.Core.Board;
 
@@ -12,7 +12,7 @@ public class BoardTests
     [Fact]
     public void StartingPosition_HasCorrectPieces()
     {
-        var board = new BoardClass(PieceFactory.StartingPosition());
+        var board = new ChessBoard(PieceFactory.StartingPosition());
 
         // Углы
         Assert.Equal(PieceType.Ratoborets, board.GetPiece(0, 0)?.Type);
@@ -42,7 +42,7 @@ public class BoardTests
     [Fact]
     public void SetPiece_UpdatesBoard()
     {
-        var board = new BoardClass();
+        var board = new ChessBoard();
         var piece = new Piece(PieceType.Helgi, PieceColor.White);
         board.SetPiece(4, 4, piece);
 
@@ -55,11 +55,11 @@ public class BoardTests
     [Fact]
     public void Clear_RemovesAllPieces()
     {
-        var board = new BoardClass(PieceFactory.StartingPosition());
+        var board = new ChessBoard(PieceFactory.StartingPosition());
         board.Clear();
 
-        for (int row = 0; row < BoardClass.Size; row++)
-            for (int col = 0; col < BoardClass.Size; col++)
+        for (int row = 0; row < ChessBoard.Size; row++)
+            for (int col = 0; col < ChessBoard.Size; col++)
                 Assert.Null(board.GetPiece(row, col));
     }
 
@@ -70,7 +70,7 @@ public class BoardTests
     [Fact]
     public void ToString_ReturnsExpectedFormat()
     {
-        var board = new BoardClass(PieceFactory.StartingPosition());
+        var board = new ChessBoard(PieceFactory.StartingPosition());
         string output = board.ToString();
 
         Assert.Contains("Ra", output);
