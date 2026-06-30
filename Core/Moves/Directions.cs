@@ -28,4 +28,10 @@ public static class Directions
     public static readonly (int DRow, int DCol)[] BishopDirections = [UpRight, UpLeft, DownRight, DownLeft];
     /// <summary>Направления для князя (ферзя) — ладья + слон.</summary>
     public static readonly (int DRow, int DCol)[] QueenDirections = [.. RookDirections, .. BishopDirections];
+    /// <summary>Направления для всадника (коня) — все 8 клеток буквой Г.</summary>
+    public static readonly (int DRow, int DCol)[] KnightDirections =
+    [
+        (2, 1), (2, -1), (-2, 1), (-2, -1),
+        (1, 2), (1, -2), (-1, 2), (-1, -2)
+    ];
 }
