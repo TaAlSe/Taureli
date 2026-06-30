@@ -16,14 +16,29 @@ Console.WriteLine($"Ход: {move.From.ToAlgebraic()} -> {move.To.ToAlgebraic()}
 var promotionMove = new Move(from, to, PieceType.Helgi);
 Console.WriteLine($"Ход с превращением: {promotionMove.From} -> {promotionMove.To}, в {promotionMove.PromotionType}");
 
-// Можно также показать доску (уже есть)
+// Доска
 var board = new ChessBoard(PieceFactory.StartingPosition());
 Console.WriteLine("\n=== Доска ===");
 Console.WriteLine(board.ToString());
 
-Console.WriteLine("\n=== Генератор ходов ладьи ===");
+// Генератор ходов (единый)
+Console.WriteLine("\n=== Генератор ходов (ладья) ===");
 var rookBoard = new ChessBoard();
 rookBoard.SetPiece(3, 3, new Piece(PieceType.Ratoborets, PieceColor.White));
-var rookMoves = RookMoveGenerator.GetMoves(rookBoard, new Position(3, 3));
+var rookMoves = MoveGenerator.GetMovesForPiece(rookBoard, new Position(3, 3));
 Console.WriteLine($"Ладья на d4 может пойти на {rookMoves.Count} клеток:");
 Console.WriteLine(string.Join(", ", rookMoves.Select(p => p.ToAlgebraic())));
+
+Console.WriteLine("\n=== Генератор ходов (слон) ===");
+var bishopBoard = new ChessBoard();
+bishopBoard.SetPiece(3, 3, new Piece(PieceType.Archer, PieceColor.White));
+var bishopMoves = MoveGenerator.GetMovesForPiece(bishopBoard, new Position(3, 3));
+Console.WriteLine($"Слон на d4 может пойти на {bishopMoves.Count} клеток:");
+Console.WriteLine(string.Join(", ", bishopMoves.Select(p => p.ToAlgebraic())));
+
+Console.WriteLine("\n=== Генератор ходов (князь) ===");
+var queenBoard = new ChessBoard();
+queenBoard.SetPiece(3, 3, new Piece(PieceType.Knyaz, PieceColor.White));
+var queenMoves = MoveGenerator.GetMovesForPiece(queenBoard, new Position(3, 3));
+Console.WriteLine($"Князь на d4 может пойти на {queenMoves.Count} клеток:");
+Console.WriteLine(string.Join(", ", queenMoves.Select(p => p.ToAlgebraic())));

@@ -16,7 +16,7 @@ public class RookMoveGeneratorTests
         var rook = new Piece(PieceType.Ratoborets, PieceColor.White);
         board.SetPiece(3, 3, rook); // d4
 
-        var moves = RookMoveGenerator.GetMoves(board, new Position(3, 3));
+        var moves = MoveGenerator.GetMovesForPiece(board, new Position(3, 3));
 
         // Ожидаем 14 ходов: 4 вверх + 3 вниз + 4 вправо + 3 влево
         Assert.Equal(14, moves.Count);
@@ -39,7 +39,7 @@ public class RookMoveGeneratorTests
         var ownPiece = new Piece(PieceType.Ratnik, PieceColor.White);
         board.SetPiece(3, 5, ownPiece); // f4 — своя пешка
 
-        var moves = RookMoveGenerator.GetMoves(board, new Position(3, 3));
+        var moves = MoveGenerator.GetMovesForPiece(board, new Position(3, 3));
 
         // Вправо должны дойти до col=4 (e4), но не дальше
         Assert.Contains(new Position(3, 4), moves);
@@ -71,7 +71,7 @@ public class RookMoveGeneratorTests
         var enemyPiece = new Piece(PieceType.Horseman, PieceColor.Black);
         board.SetPiece(3, 5, enemyPiece); // f4 — вражеский конь
 
-        var moves = RookMoveGenerator.GetMoves(board, new Position(3, 3));
+        var moves = MoveGenerator.GetMovesForPiece(board, new Position(3, 3));
 
         // Должен быть ход на f4 (взять коня)
         Assert.Contains(new Position(3, 5), moves);
@@ -87,7 +87,7 @@ public class RookMoveGeneratorTests
     public void Rook_FromEmptySquare_ReturnsEmptyList()
     {
         var board = new ChessBoard();
-        var moves = RookMoveGenerator.GetMoves(board, new Position(3, 3));
+        var moves = MoveGenerator.GetMovesForPiece(board, new Position(3, 3));
         Assert.Empty(moves);
     }
 }
