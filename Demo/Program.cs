@@ -42,3 +42,17 @@ queenBoard.SetPiece(3, 3, new Piece(PieceType.Knyaz, PieceColor.White));
 var queenMoves = MoveGenerator.GetMovesForPiece(queenBoard, new Position(3, 3));
 Console.WriteLine($"Князь на d4 может пойти на {queenMoves.Count} клеток:");
 Console.WriteLine(string.Join(", ", queenMoves.Select(p => p.ToAlgebraic())));
+
+Console.WriteLine("\n=== Генератор ходов (всадник) ===");
+var knightBoard = new ChessBoard();
+knightBoard.SetPiece(3, 3, new Piece(PieceType.Horseman, PieceColor.White));
+var knightMoves = MoveGenerator.GetMovesForPiece(knightBoard, new Position(3, 3));
+Console.WriteLine($"Всадник на d4 может пойти на {knightMoves.Count} клеток:");
+Console.WriteLine(string.Join(", ", knightMoves.Select(p => p.ToAlgebraic())));
+
+Console.WriteLine("\n=== Генератор ходов (хелги) ===");
+var helgiBoard = new ChessBoard();
+helgiBoard.SetPiece(3, 3, new Piece(PieceType.Helgi, PieceColor.White));
+var helgiMoves = MoveGenerator.GetMovesForPiece(helgiBoard, new Position(3, 3));
+Console.WriteLine($"Хелги на d4 может пойти на {helgiMoves.Count} клеток:");
+Console.WriteLine(string.Join(", ", helgiMoves.Select(p => p.ToAlgebraic())));
