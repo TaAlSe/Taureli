@@ -56,3 +56,12 @@ helgiBoard.SetPiece(3, 3, new Piece(PieceType.Helgi, PieceColor.White));
 var helgiMoves = MoveGenerator.GetMovesForPiece(helgiBoard, new Position(3, 3));
 Console.WriteLine($"Хелги на d4 может пойти на {helgiMoves.Count} клеток:");
 Console.WriteLine(string.Join(", ", helgiMoves.Select(p => p.ToAlgebraic())));
+
+Console.WriteLine("\n=== Генератор ходов (пешка) ===");
+var pawnBoard = new ChessBoard();
+pawnBoard.SetPiece(1, 4, new Piece(PieceType.Ratnik, PieceColor.White));
+var pawnMoves = MoveGenerator.GetMovesForPiece(pawnBoard, new Position(1, 4));
+Console.WriteLine($"Белая пешка на e2 может пойти на {pawnMoves.Count} клеток:");
+foreach (var move in pawnMoves)
+    Console.WriteLine($"  {move.From.ToAlgebraic()} -> {move.To.ToAlgebraic()}" +
+                      (move.PromotionType.HasValue ? $" (превращение в {move.PromotionType})" : ""));

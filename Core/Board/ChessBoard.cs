@@ -48,6 +48,11 @@ public class ChessBoard
     }
 
     /// <summary>
+    /// Возвращает фигуру по позиции (удобная перегрузка).
+    /// </summary>
+    public Piece? GetPiece(Position pos) => pos.IsValid ? _squares[pos.Row, pos.Col] : null;
+
+    /// <summary>
     /// Устанавливает фигуру в заданную клетку (можно null для очистки).
     /// </summary>
     public void SetPiece(int row, int col, Piece? piece)

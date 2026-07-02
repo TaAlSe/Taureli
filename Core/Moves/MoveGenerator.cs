@@ -21,25 +21,34 @@ public static class MoveGenerator
     /// <param name="board">Текущая доска.</param>
     /// <param name="from">Позиция фигуры.</param>
     /// <returns>Список доступных позиций для хода.</returns>
-    public static List<Position> GetMovesForPiece(ChessBoard board, Position from)
+    public static List<Move> GetMovesForPiece(ChessBoard board, Position from)
     {
-        // Фигура.
         var piece = board.GetPiece(from.Row, from.Col);
         if (piece == null) return [];
 
-        // Линейные фигуры
-        if (_directionsMap.TryGetValue(piece.Type, out var directions))
-            return LinearMoveGenerator.GetMoves(board, from, directions);
-
-        // Специальные фигуры, которые не используют линейные направления
-        var knightMoves = KnightMoveGenerator.GetMoves(board, from);
+        // Специальные фигуры (нелинейные)
         if (piece.Type == PieceType.Horseman)
-            return knightMoves;
+            return [.. KnightMoveGenerator.GetMoves(board, from).Select(pos => new Move(from, pos))];
+
         if (piece.Type == PieceType.Helgi)
         {
-            // Хелги = князь + всадник
             var queenMoves = LinearMoveGenerator.GetMoves(board, from, Directions.QueenDirections);
-            return [.. queenMoves, .. knightMoves];
+            var knightMoves = KnightMoveGenerator.GetMoves(board, from);
+            var allPositions = queenMoves.Concat(knightMoves).ToList();
+            return [.. allPositions.Select(pos => new Move(from, pos))];
+        }
+
+        if (piece.Type == PieceType.Ratnik)
+        {
+            // Пешка возвращает Move, а не Position
+            return PawnMoveGenerator.GetMoves(board, from);
+        }
+
+        // Линейные фигуры (ладья, слон, князь)
+        if (_directionsMap.TryGetValue(piece.Type, out var directions))
+        {
+            var positions = LinearMoveGenerator.GetMoves(board, from, directions);
+            return [.. positions.Select(pos => new Move(from, pos))];
         }
 
         return [];
