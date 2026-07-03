@@ -30,9 +30,6 @@ public static class PawnMoveGenerator
         // Начальный ряд для двойного хода: для белых — 1 (вторая горизонталь), для чёрных — 6 (седьмая).
         int startRow = piece.Color == PieceColor.White ? 1 : 6;
 
-        // Ряд превращения: для белых — 7 (восьмая), для чёрных — 0 (первая).
-        // int promotionRow = piece.Color == PieceColor.White ? 7 : 0;
-
         // 1. Ход на 1 клетку вперёд
         int newRow = from.Row + direction;
         if (newRow >= 0 && newRow < 8)

@@ -28,13 +28,16 @@ public static class MoveGenerator
 
         // Специальные фигуры (нелинейные)
         if (piece.Type == PieceType.Horseman)
-            return [.. KnightMoveGenerator.GetMoves(board, from).Select(pos => new Move(from, pos))];
+        {
+            var positions = LinearMoveGenerator.GetMoves(board, from, Directions.KnightDirections, 1);
+            return [.. positions.Select(pos => new Move(from, pos))];
+        }
 
         if (piece.Type == PieceType.Helgi)
         {
-            var queenMoves = LinearMoveGenerator.GetMoves(board, from, Directions.QueenDirections);
-            var knightMoves = KnightMoveGenerator.GetMoves(board, from);
-            var allPositions = queenMoves.Concat(knightMoves).ToList();
+            var queenPositions = LinearMoveGenerator.GetMoves(board, from, Directions.QueenDirections);
+            var knightPositions = LinearMoveGenerator.GetMoves(board, from, Directions.KnightDirections, 1);
+            var allPositions = queenPositions.Concat(knightPositions).ToList();
             return [.. allPositions.Select(pos => new Move(from, pos))];
         }
 
@@ -42,6 +45,12 @@ public static class MoveGenerator
         {
             // Пешка возвращает Move, а не Position
             return PawnMoveGenerator.GetMoves(board, from);
+        }
+
+        if (piece.Type == PieceType.Volkhv)
+        {
+            var positions = LinearMoveGenerator.GetMoves(board, from, Directions.QueenDirections, 1);
+            return [.. positions.Select(pos => new Move(from, pos))];
         }
 
         // Линейные фигуры (ладья, слон, князь)

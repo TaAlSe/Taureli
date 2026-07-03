@@ -26,10 +26,10 @@ public class BishopMoveGeneratorTests
         Assert.Equal(13, moves.Count);
 
         // Проверим крайние точки
-        Assert.Contains(new Position(7, 7), moves);
-        Assert.Contains(new Position(0, 0), moves);
-        Assert.Contains(new Position(6, 0), moves);
-        Assert.Contains(new Position(0, 6), moves);
+        Assert.Contains(moves, m => m.To == new Position(7, 7));
+        Assert.Contains(moves, m => m.To == new Position(0, 0));
+        Assert.Contains(moves, m => m.To == new Position(6, 0));
+        Assert.Contains(moves, m => m.To == new Position(0, 6));
     }
 
     /// <summary>
@@ -47,10 +47,10 @@ public class BishopMoveGeneratorTests
         var moves = MoveGenerator.GetMovesForPiece(board, new Position(3, 3));
 
         // Должен дойти до (4,4), но не до (5,5) и дальше
-        Assert.Contains(new Position(4, 4), moves);
-        Assert.DoesNotContain(new Position(5, 5), moves);
-        Assert.DoesNotContain(new Position(6, 6), moves);
-        Assert.DoesNotContain(new Position(7, 7), moves);
+        Assert.Contains(moves, m => m.To == new Position(4, 4));
+        Assert.DoesNotContain(moves, m => m.To == new Position(5, 5));
+        Assert.DoesNotContain(moves, m => m.To == new Position(6, 6));
+        Assert.DoesNotContain(moves, m => m.To == new Position(7, 7));
     }
 
     /// <summary>
@@ -68,10 +68,10 @@ public class BishopMoveGeneratorTests
         var moves = MoveGenerator.GetMovesForPiece(board, new Position(3, 3));
 
         // Может взять на (5,5)
-        Assert.Contains(new Position(5, 5), moves);
+        Assert.Contains(moves, m => m.To == new Position(5, 5));
         // Но не дальше
-        Assert.DoesNotContain(new Position(6, 6), moves);
-        Assert.DoesNotContain(new Position(7, 7), moves);
+        Assert.DoesNotContain(moves, m => m.To == new Position(6, 6));
+        Assert.DoesNotContain(moves, m => m.To == new Position(7, 7));
     }
 
     /// <summary>

@@ -20,8 +20,8 @@ public class QueenMoveGeneratorTests
         // На пустой доске: ладья даёт 14 ходов, слон — 13, итого 27
         Assert.Equal(27, moves.Count);
         // Проверим крайние точки
-        Assert.Contains(new Position(7, 7), moves); // диагональ
-        Assert.Contains(new Position(7, 3), moves); // вертикаль
-        Assert.Contains(new Position(3, 7), moves); // горизонталь
+        Assert.Contains(moves, m => m.To == new Position(7, 7)); // диагональ
+        Assert.Contains(moves, m => m.To == new Position(7, 3)); // вертикаль
+        Assert.Contains(moves, m => m.To == new Position(3, 7)); // горизонталь
     }
 }

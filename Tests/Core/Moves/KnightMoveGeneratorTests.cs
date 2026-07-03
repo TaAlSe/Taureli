@@ -28,7 +28,7 @@ public class KnightMoveGeneratorTests
             new Position(5, 2), new Position(5, 4)
         };
         foreach (var pos in expected)
-            Assert.Contains(pos, moves);
+            Assert.Contains(moves, m => m.To == pos);
     }
 
     /// <summary>
@@ -47,8 +47,8 @@ public class KnightMoveGeneratorTests
         board.SetPiece(1, 4, own); // b5 — своя
 
         var moves = MoveGenerator.GetMovesForPiece(board, new Position(3, 3));
-        Assert.Contains(new Position(5, 4), moves); // может взять врага
-        Assert.DoesNotContain(new Position(1, 4), moves); // не может на свою
+        Assert.Contains(moves, m => m.To == new Position(5, 4)); // может взять врага
+        Assert.DoesNotContain(moves, m => m.To == new Position(1, 4)); // не может на свою
     }
 
     /// <summary>

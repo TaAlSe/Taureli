@@ -6,6 +6,10 @@ namespace Tests.Core.Moves;
 
 public class PawnMoveGeneratorTests
 {
+    /// <summary>
+    /// Проверяет, что белая пешка с начальной позиции (e2) может пойти на одну клетку (e3)
+    /// и на две клетки (e4), если обе клетки свободны.
+    /// </summary>
     [Fact]
     public void WhitePawn_FromStart_CanMoveOneOrTwoSquaresForward()
     {
@@ -20,6 +24,10 @@ public class PawnMoveGeneratorTests
         Assert.Contains(new Move(new Position(1, 4), new Position(3, 4)), moves);
     }
 
+    /// <summary>
+    /// Проверяет, что если клетка перед пешкой занята, то пешка не может пойти вперёд,
+    /// и двойной ход также невозможен (из-за блокировки промежуточной клетки).
+    /// </summary>
     [Fact]
     public void WhitePawn_Blocked_CanOnlyMoveOneOrNone()
     {
@@ -34,6 +42,10 @@ public class PawnMoveGeneratorTests
         Assert.Empty(moves);
     }
 
+    /// <summary>
+    /// Проверяет, что белая пешка может взять вражескую фигуру по диагонали влево и вправо,
+    /// при этом сохраняя возможность обычного хода вперёд и двойного хода.
+    /// </summary>
     [Fact]
     public void WhitePawn_CanCaptureDiagonally()
     {
@@ -52,6 +64,10 @@ public class PawnMoveGeneratorTests
         Assert.Contains(new Move(new Position(1, 4), new Position(3, 4)), moves);
     }
 
+    /// <summary>
+    /// Проверяет, что белая пешка на предпоследней горизонтали (e7) при ходе вперёд
+    /// создаёт ход с превращением (PromotionType = null, так как выбор фигуры отложен).
+    /// </summary>
     [Fact]
     public void WhitePawn_OnPromotionRank_ReturnsMoveWithPromotion()
     {
@@ -67,6 +83,10 @@ public class PawnMoveGeneratorTests
         Assert.Null(move.PromotionType); // пока null
     }
 
+    /// <summary>
+    /// Проверяет, что чёрная пешка движется вниз (уменьшение row) с начальной позиции e7
+    /// и имеет ходы на e6 и e5 (двойной ход).
+    /// </summary>
     [Fact]
     public void BlackPawn_MovesDownward()
     {

@@ -48,7 +48,7 @@ public class ChessBoard
     }
 
     /// <summary>
-    /// Возвращает фигуру по позиции (удобная перегрузка).
+    /// Возвращает фигуру по позиции (прямой доступ с проверкой IsValid).
     /// </summary>
     public Piece? GetPiece(Position pos) => pos.IsValid ? _squares[pos.Row, pos.Col] : null;
 

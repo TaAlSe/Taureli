@@ -21,9 +21,9 @@ public class HelgiMoveGeneratorTests
         // На пустой доске: князь даёт 27, конь — 8, итого 35
         Assert.Equal(35, moves.Count);
         // Проверим наличие коневого хода
-        Assert.Contains(new Position(5, 4), moves);
+        Assert.Contains(moves, m => m.To == new Position(5, 4));
         // и княжеского
-        Assert.Contains(new Position(7, 7), moves);
+        Assert.Contains(moves, m => m.To == new Position(7, 7));
     }
 
     /// <summary>
@@ -42,8 +42,8 @@ public class HelgiMoveGeneratorTests
 
         var moves = MoveGenerator.GetMovesForPiece(board, new Position(3, 3));
         // Проверяем, что ход на (5,5) отсутствует (заблокирован)
-        Assert.DoesNotContain(new Position(5, 5), moves);
+        Assert.DoesNotContain(moves, m => m.To == new Position(5, 5));
         // Но конь может прыгнуть на (5,4) — есть
-        Assert.Contains(new Position(5, 4), moves);
+        Assert.Contains(moves, m => m.To == new Position(5, 4));
     }
 }
