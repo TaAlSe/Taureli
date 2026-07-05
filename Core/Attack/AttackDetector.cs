@@ -31,18 +31,16 @@ public static class AttackDetector
                 var piece = board.GetPiece(target);
                 if (piece == null) continue;
 
-                if (piece.Color == byColor)
-                {
-                    if (CanPieceAttackInDirection(piece.Type, dRow, dCol))
-                        return true;
-                    // Если своя фигура, но не атакующая по этому направлению, дальше не идём
-                    break;
-                }
-                else
+                if (piece.Color != byColor)
                 {
                     // Встретили вражескую фигуру, но она не подходит — дальше не идём
                     break;
                 }
+
+                if (CanPieceAttackInDirection(piece.Type, dRow, dCol))
+                    return true;
+                // Если своя фигура, но не атакующая по этому направлению, дальше не идём
+                break;
             }
         }
 
@@ -71,7 +69,7 @@ public static class AttackDetector
         int pawnDirection = byColor == PieceColor.White ? 1 : -1;
         foreach (int colOffset in new[] { -1, 1 })
         {
-            var target = new Position(pos.Row + pawnDirection, pos.Col + colOffset);
+            var target = new Position(pos.Row - pawnDirection, pos.Col + colOffset);
             if (!target.IsValid) continue;
             var piece = board.GetPiece(target);
             if (piece != null && piece.Color == byColor && piece.Type == PieceType.Ratnik)
