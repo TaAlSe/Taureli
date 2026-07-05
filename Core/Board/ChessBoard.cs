@@ -62,6 +62,17 @@ public class ChessBoard
     }
 
     /// <summary>
+    /// Устанавливает фигуру в заданную клетку (можно null для очистки).
+    /// </summary>
+    /// <exception cref="ArgumentException">Если позиция выходит за пределы доски.</exception>
+    public void SetPiece(Position pos, Piece? piece)
+    {
+        if (!pos.IsValid)
+            throw new ArgumentException($"Некорректная позиция: {pos}", nameof(pos));
+        _squares[pos.Row, pos.Col] = piece;
+    }
+
+    /// <summary>
     /// Очищает всю доску (все клетки становятся null).
     /// </summary>
     public void Clear()
