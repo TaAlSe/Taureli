@@ -1,6 +1,6 @@
-﻿using Core.Pieces;
+﻿using Core.Board;
 using Core.Moves;
-using Core.Board;
+using Core.Pieces;
 
 namespace Core.Attack;
 
@@ -18,7 +18,7 @@ public static class AttackDetector
     /// <returns>true, если клетка атакована.</returns>
     public static bool IsSquareAttacked(ChessBoard board, Position pos, PieceColor byColor)
     {
-        // 1. Проверка линейных фигур (ладья, слон, ферзь, хелги)
+        // 1. Линейные фигуры (ладья, слон, ферзь, хелги)
         foreach (var (dRow, dCol) in Directions.QueenDirections)
         {
             for (int step = 1; step < 8; step++)
@@ -32,19 +32,17 @@ public static class AttackDetector
                 if (piece == null) continue;
 
                 if (piece.Color != byColor)
-                {
-                    // Встретили вражескую фигуру, но она не подходит — дальше не идём
-                    break;
-                }
+                    break; // вражеская фигура не подходит, дальше не идём
 
                 if (CanPieceAttackInDirection(piece.Type, dRow, dCol))
                     return true;
-                // Если своя фигура, но не атакующая по этому направлению, дальше не идём
+
+                // своя фигура, но не атакует по этому направлению
                 break;
             }
         }
 
-        // 2. Проверка коня (всадника) и хелги (конь-часть)
+        // 2. Конь (всадник) и хелги (как конь)
         foreach (var (dRow, dCol) in Directions.KnightDirections)
         {
             var target = new Position(pos.Row + dRow, pos.Col + dCol);
@@ -55,7 +53,7 @@ public static class AttackDetector
                 return true;
         }
 
-        // 3. Проверка короля (волхва)
+        // 3. Король (волхв)
         foreach (var (dRow, dCol) in Directions.QueenDirections)
         {
             var target = new Position(pos.Row + dRow, pos.Col + dCol);
@@ -65,7 +63,7 @@ public static class AttackDetector
                 return true;
         }
 
-        // 4. Проверка пешки (ратника) — атакует по диагонали вперёд
+        // 4. Пешка (ратник) — атакует по диагонали вперёд
         int pawnDirection = byColor == PieceColor.White ? 1 : -1;
         foreach (int colOffset in new[] { -1, 1 })
         {
