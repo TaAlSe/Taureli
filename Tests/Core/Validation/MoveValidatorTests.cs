@@ -21,7 +21,7 @@ public class MoveValidatorTests
     /// <summary>
     /// Проверяет, что ход пешки, который открывает диагональ для атаки на короля, считается нелегальным.
     /// Белый король на e1, белая пешка на f2, чёрный слон на h4.
-    /// Ход f2-f3 убирает блокировку, и слон атакует короля → нелегально.
+    /// Ход f2-f3 убирает блокировку → нелегально.
     /// </summary>
     [Fact]
     public void MoveThatExposesKingToCheck_IsIllegal()
@@ -29,7 +29,7 @@ public class MoveValidatorTests
         var board = new ChessBoard();
         board.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
         board.SetPiece(new Position(1, 5), new Piece(PieceType.Ratnik, PieceColor.White));
-        board.SetPiece(new Position(4, 7), new Piece(PieceType.Archer, PieceColor.Black));
+        board.SetPiece(new Position(3, 7), new Piece(PieceType.Archer, PieceColor.Black));
 
         var move = new Move(new Position(1, 5), new Position(2, 5));
         Assert.False(MoveValidator.IsLegalMove(board, move, PieceColor.White));
@@ -45,7 +45,7 @@ public class MoveValidatorTests
         var board = new ChessBoard();
         board.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
         board.SetPiece(new Position(1, 5), new Piece(PieceType.Ratnik, PieceColor.White));
-        board.SetPiece(new Position(4, 7), new Piece(PieceType.Archer, PieceColor.Black));
+        board.SetPiece(new Position(3, 7), new Piece(PieceType.Archer, PieceColor.Black));
 
         var legalMoves = MoveValidator.GetLegalMoves(board, new Position(1, 5), PieceColor.White);
         Assert.Empty(legalMoves);
