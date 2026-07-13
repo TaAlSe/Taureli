@@ -34,15 +34,14 @@ public static class MoveValidator
         {
             // Пешка превращается в указанную фигуру
             board.SetPiece(move.To, new Piece(promotionType.Value, currentColor));
-            board.SetPiece(move.From, null);
         }
         else
         {
             // Обычный ход
             board.SetPiece(move.To, movingPiece);
-            board.SetPiece(move.From, null);
         }
-
+        board.SetPiece(move.From, null);
+        
         // 4. Находим позицию короля текущего игрока
         Position? kingPos = FindKing(board, currentColor);
         bool isLegal = false;
@@ -50,23 +49,14 @@ public static class MoveValidator
         {
             // Проверяем, атакован ли король фигурами противника
             PieceColor opponentColor = currentColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
-            if (!AttackDetector.IsSquareAttacked(board, kingPos.Value, opponentColor))
-                isLegal = true;
+            isLegal = !AttackDetector.IsSquareAttacked(board, kingPos.Value, opponentColor);
         }
 
         // 5. Откатываем ход
-        if (promotionType.HasValue)
-        {
-            // Восстанавливаем пешку на From
-            board.SetPiece(move.From, movingPiece);
-            // Восстанавливаем фигуру на To (если была)
-            board.SetPiece(move.To, capturedPiece);
-        }
-        else
-        {
-            board.SetPiece(move.From, movingPiece);
-            board.SetPiece(move.To, capturedPiece);
-        }
+        // Восстанавливаем пешку на From
+        board.SetPiece(move.From, movingPiece);
+        // Восстанавливаем фигуру на To (если была)
+        board.SetPiece(move.To, capturedPiece);
 
         return isLegal;
     }

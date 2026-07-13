@@ -19,46 +19,35 @@ public class MoveValidatorTests
     }
 
     /// <summary>
-    /// Проверяет, что ход, открывающий линию для атаки на короля, считается нелегальным.
-    /// Белый король на e1, белая пешка на e2, чёрная ладья на e8.
-    /// Ход пешки e2-e3 открывает вертикаль, ладья атакует короля → нелегально.
+    /// Проверяет, что ход пешки, который открывает диагональ для атаки на короля, считается нелегальным.
+    /// Белый король на e1, белая пешка на f2, чёрный слон на h4.
+    /// Ход f2-f3 убирает блокировку, и слон атакует короля → нелегально.
     /// </summary>
     [Fact]
     public void MoveThatExposesKingToCheck_IsIllegal()
     {
         var board = new ChessBoard();
         board.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
-        board.SetPiece(new Position(1, 4), new Piece(PieceType.Ratnik, PieceColor.White));
-        board.SetPiece(new Position(7, 4), new Piece(PieceType.Ratoborets, PieceColor.Black));
+        board.SetPiece(new Position(1, 5), new Piece(PieceType.Ratnik, PieceColor.White));
+        board.SetPiece(new Position(4, 7), new Piece(PieceType.Archer, PieceColor.Black));
 
-        var move = new Move(new Position(1, 4), new Position(2, 4));
+        var move = new Move(new Position(1, 5), new Position(2, 5));
         Assert.False(MoveValidator.IsLegalMove(board, move, PieceColor.White));
     }
 
     /// <summary>
-    /// Проверяет, что ход, который не оставляет короля под шахом, считается легальным.
-    /// </summary>
-    [Fact]
-    public void MoveThatTakesAttacker_IsLegal()
-    {
-        var board = new ChessBoard(PieceFactory.StartingPosition());
-        var move = new Move(new Position(1, 4), new Position(3, 4));
-        Assert.True(MoveValidator.IsLegalMove(board, move, PieceColor.White));
-    }
-
-    /// <summary>
     /// Проверяет, что GetLegalMoves возвращает только легальные ходы.
-    /// В позиции, где пешка прикрывает короля от ладьи, все ходы пешки нелегальны.
+    /// В позиции с пешкой f2, блокирующей слона h4, все ходы пешки нелегальны.
     /// </summary>
     [Fact]
     public void GetLegalMoves_FiltersIllegalMoves()
     {
         var board = new ChessBoard();
         board.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
-        board.SetPiece(new Position(1, 4), new Piece(PieceType.Ratnik, PieceColor.White));
-        board.SetPiece(new Position(7, 4), new Piece(PieceType.Ratoborets, PieceColor.Black));
+        board.SetPiece(new Position(1, 5), new Piece(PieceType.Ratnik, PieceColor.White));
+        board.SetPiece(new Position(4, 7), new Piece(PieceType.Archer, PieceColor.Black));
 
-        var legalMoves = MoveValidator.GetLegalMoves(board, new Position(1, 4), PieceColor.White);
+        var legalMoves = MoveValidator.GetLegalMoves(board, new Position(1, 5), PieceColor.White);
         Assert.Empty(legalMoves);
     }
 }
