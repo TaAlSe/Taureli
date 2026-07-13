@@ -1,5 +1,6 @@
-﻿using Core.Pieces;
-using Core.Board;
+﻿using Core.Board;
+using Core.Moves;
+using Core.Pieces;
 
 namespace Tests.Core.Board;
 
@@ -78,5 +79,16 @@ public class BoardTests
         Assert.Contains("Rt", output);
         Assert.Contains("rt", output);
         Assert.Contains("a  b  c  d  e  f  g  h", output);
+    }
+
+    /// <summary>
+    /// Проверяет, что попытка установить фигуру за пределами доски выбрасывает ArgumentException.
+    /// </summary>
+    [Fact]
+    public void SetPiece_InvalidPosition_ThrowsArgumentException()
+    {
+        var board = new ChessBoard();
+        Assert.Throws<ArgumentException>(() => board.SetPiece(8, 4, new Piece(PieceType.Ratnik, PieceColor.White)));
+        Assert.Throws<ArgumentException>(() => board.SetPiece(new Position(8, 4), new Piece(PieceType.Ratnik, PieceColor.White)));
     }
 }

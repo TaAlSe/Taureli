@@ -57,8 +57,7 @@ public class ChessBoard
     /// </summary>
     public void SetPiece(int row, int col, Piece? piece)
     {
-        if (new Position(row, col).IsValid)
-            _squares[row, col] = piece;
+        SetPiece(new Position(row, col), piece);
     }
 
     /// <summary>
