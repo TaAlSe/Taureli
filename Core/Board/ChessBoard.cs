@@ -11,12 +11,71 @@ public class ChessBoard
     public const int Size = 8;
     private readonly Piece?[,] _squares;
 
-    /// <summary>
-    /// Создаёт пустую доску (все клетки null).
-    /// </summary>
-    public ChessBoard()
+    // Права на рокировку (доступны только для чтения, изменяются через методы)
+    public bool WhiteCanCastleKingSide { get; private set; }
+    public bool WhiteCanCastleQueenSide { get; private set; }
+    public bool BlackCanCastleKingSide { get; private set; }
+    public bool BlackCanCastleQueenSide { get; private set; }
+
+    // Конструкторы по умолчанию устанавливают все права в true
+    public ChessBoard(
+    Piece?[,]? initialPosition = null,
+    bool whiteCanCastleKingSide = true,
+    bool whiteCanCastleQueenSide = true,
+    bool blackCanCastleKingSide = true,
+    bool blackCanCastleQueenSide = true)
     {
         _squares = new Piece?[Size, Size];
+        WhiteCanCastleKingSide = whiteCanCastleKingSide;
+        WhiteCanCastleQueenSide = whiteCanCastleQueenSide;
+        BlackCanCastleKingSide = blackCanCastleKingSide;
+        BlackCanCastleQueenSide = blackCanCastleQueenSide;
+
+        if (initialPosition != null)
+        {
+            // копирование массива
+        }
+    }
+
+    /// <summary>
+    /// Обновляет права на рокировку после выполнения хода.
+    /// </summary>
+    public void UpdateCastlingRights(Move move)
+    {
+        // Если ход начинается с позиции короля (e1 или e8)
+        if (move.From == new Position(0, 4)) // белый король
+        {
+            WhiteCanCastleKingSide = false;
+            WhiteCanCastleQueenSide = false;
+        }
+        else if (move.From == new Position(7, 4)) // чёрный король
+        {
+            BlackCanCastleKingSide = false;
+            BlackCanCastleQueenSide = false;
+        }
+
+        // Если ход начинается с ладьи
+        CheckRookMove(move.From);
+        // Если ход заканчивается на клетке, где стояла ладья (взятие)
+        CheckRookCapture(move.To);
+    }
+
+    private void CheckRookMove(Position pos)
+    {
+        if (pos == new Position(0, 0)) WhiteCanCastleQueenSide = false;
+        else if (pos == new Position(0, 7)) WhiteCanCastleKingSide = false;
+        else if (pos == new Position(7, 0)) BlackCanCastleQueenSide = false;
+        else if (pos == new Position(7, 7)) BlackCanCastleKingSide = false;
+    }
+
+    private void CheckRookCapture(Position pos)
+    {
+        // Если ход заканчивается на начальной клетке ладьи, то ладья была взята
+        // (это возможно, только если на той клетке стояла ладья противника)
+        if (pos == new Position(0, 0)) WhiteCanCastleQueenSide = false;
+        else if (pos == new Position(0, 7)) WhiteCanCastleKingSide = false;
+        else if (pos == new Position(7, 0)) BlackCanCastleQueenSide = false;
+        else if (pos == new Position(7, 7)) BlackCanCastleKingSide = false;
     }
 
     /// <summary>
