@@ -18,6 +18,11 @@ public class ChessBoard
     public bool BlackCanCastleQueenSide { get; private set; }
 
     // Конструкторы по умолчанию устанавливают все права в true
+    /// <summary>
+    /// Создаёт доску, заполняя её переданной расстановкой.
+    /// </summary>
+    /// <param name="initialPosition">Двумерный массив 8x8 с фигурами (может содержать null).</param>
+    /// <exception cref="ArgumentException">Если размеры массива не 8x8.</exception>
     public ChessBoard(
     Piece?[,]? initialPosition = null,
     bool whiteCanCastleKingSide = true,
@@ -33,8 +38,26 @@ public class ChessBoard
 
         if (initialPosition != null)
         {
-            // копирование массива
+            if (initialPosition.GetLength(0) != Size || initialPosition.GetLength(1) != Size)
+                throw new ArgumentException($"Массив должен быть размером {Size}x{Size}", nameof(initialPosition));
+            for (int row = 0; row < Size; row++)
+                for (int col = 0; col < Size; col++)
+                    _squares[row, col] = initialPosition[row, col];
         }
+    }
+
+    private readonly Dictionary<Position, Action> _rookCastleRights = new()
+    {
+        [new Position(0, 0)] = () => WhiteCanCastleQueenSide = false,
+        [new Position(0, 7)] = () => WhiteCanCastleKingSide = false,
+        [new Position(7, 0)] = () => BlackCanCastleQueenSide = false,
+        [new Position(7, 7)] = () => BlackCanCastleKingSide = false,
+    };
+
+    private void CheckRookPosition(Position pos)
+    {
+        if (_rookCastleRights.TryGetValue(pos, out var action))
+            action();
     }
 
     /// <summary>
@@ -42,40 +65,22 @@ public class ChessBoard
     /// </summary>
     public void UpdateCastlingRights(Move move)
     {
-        // Если ход начинается с позиции короля (e1 или e8)
-        if (move.From == new Position(0, 4)) // белый король
+        // Король
+        if (move.From == new Position(0, 4))
         {
             WhiteCanCastleKingSide = false;
             WhiteCanCastleQueenSide = false;
         }
-        else if (move.From == new Position(7, 4)) // чёрный король
+        else if (move.From == new Position(7, 4))
         {
             BlackCanCastleKingSide = false;
             BlackCanCastleQueenSide = false;
         }
 
-        // Если ход начинается с ладьи
-        CheckRookMove(move.From);
-        // Если ход заканчивается на клетке, где стояла ладья (взятие)
-        CheckRookCapture(move.To);
-    }
-
-    private void CheckRookMove(Position pos)
-    {
-        if (pos == new Position(0, 0)) WhiteCanCastleQueenSide = false;
-        else if (pos == new Position(0, 7)) WhiteCanCastleKingSide = false;
-        else if (pos == new Position(7, 0)) BlackCanCastleQueenSide = false;
-        else if (pos == new Position(7, 7)) BlackCanCastleKingSide = false;
-    }
-
-    private void CheckRookCapture(Position pos)
-    {
-        // Если ход заканчивается на начальной клетке ладьи, то ладья была взята
-        // (это возможно, только если на той клетке стояла ладья противника)
-        if (pos == new Position(0, 0)) WhiteCanCastleQueenSide = false;
-        else if (pos == new Position(0, 7)) WhiteCanCastleKingSide = false;
-        else if (pos == new Position(7, 0)) BlackCanCastleQueenSide = false;
-        else if (pos == new Position(7, 7)) BlackCanCastleKingSide = false;
+        // Ладья на начальной клетке (двигалась)
+        CheckRookPosition(move.From);
+        // Ладья на конечной клетке (была взята)
+        CheckRookPosition(move.To);
     }
 
     /// <summary>
