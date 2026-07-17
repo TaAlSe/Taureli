@@ -46,18 +46,16 @@ public class ChessBoard
         }
     }
 
-    private readonly Dictionary<Position, Action> _rookCastleRights = new()
-    {
-        [new Position(0, 0)] = () => WhiteCanCastleQueenSide = false,
-        [new Position(0, 7)] = () => WhiteCanCastleKingSide = false,
-        [new Position(7, 0)] = () => BlackCanCastleQueenSide = false,
-        [new Position(7, 7)] = () => BlackCanCastleKingSide = false,
-    };
-
     private void CheckRookPosition(Position pos)
     {
-        if (_rookCastleRights.TryGetValue(pos, out var action))
-            action();
+        (WhiteCanCastleQueenSide, WhiteCanCastleKingSide, BlackCanCastleQueenSide, BlackCanCastleKingSide) = pos switch
+        {
+            (0, 0) => (false, WhiteCanCastleKingSide, BlackCanCastleQueenSide, BlackCanCastleKingSide),
+            (0, 7) => (WhiteCanCastleQueenSide, false, BlackCanCastleQueenSide, BlackCanCastleKingSide),
+            (7, 0) => (WhiteCanCastleQueenSide, WhiteCanCastleKingSide, false, BlackCanCastleKingSide),
+            (7, 7) => (WhiteCanCastleQueenSide, WhiteCanCastleKingSide, BlackCanCastleQueenSide, false),
+            _ => (WhiteCanCastleQueenSide, WhiteCanCastleKingSide, BlackCanCastleQueenSide, BlackCanCastleKingSide)
+        };
     }
 
     /// <summary>
