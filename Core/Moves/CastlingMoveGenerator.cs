@@ -17,20 +17,22 @@ public static class CastlingMoveGenerator
         var moves = new List<Move>();
         int row = color == PieceColor.White ? 0 : 7;
         var kingPos = new Position(row, 4);
+
+        // Проверяем, что на месте короля действительно стоит король нужного цвета
         var king = board.GetPiece(kingPos);
         if (king == null || king.Type != PieceType.Volkhv || king.Color != color)
-            return moves;
+            return moves; // или throw new InvalidOperationException("Король не найден на своей начальной позиции");
 
-        // Проверяем, не двигался ли король (по флагу)
+        var opponentColor = color.Opposite();
+
+        // Права на рокировку
         bool canCastleKingSide = color == PieceColor.White ? board.WhiteCanCastleKingSide : board.BlackCanCastleKingSide;
         bool canCastleQueenSide = color == PieceColor.White ? board.WhiteCanCastleQueenSide : board.BlackCanCastleQueenSide;
 
         if (!canCastleKingSide && !canCastleQueenSide)
             return moves;
 
-        var opponentColor = color == PieceColor.White ? PieceColor.Black : PieceColor.White;
-
-        // Проверяем, не под шахом ли король
+        // Король не должен быть под шахом
         if (AttackDetector.IsSquareAttacked(board, kingPos, opponentColor))
             return moves;
 
@@ -50,14 +52,12 @@ public static class CastlingMoveGenerator
         int rookCol = kingSide ? 7 : 0;
         var rookPos = new Position(row, rookCol);
         var rook = board.GetPiece(rookPos);
-        if (rook == null || rook.Type != PieceType.Ratoborets || rook.Color != kingPos.Color)
+        var color = row == 0 ? PieceColor.White : PieceColor.Black;
+        if (rook == null || rook.Type != PieceType.Ratoborets || rook.Color != color) // опечатка: нужно использовать color, но color у нас нет
             return false;
 
         // Проверяем, свободны ли промежуточные клетки
-        int startCol = kingSide ? 5 : 1;
-        int endCol = kingSide ? 6 : 3;
         int direction = kingSide ? 1 : -1;
-
         for (int col = kingPos.Col + direction; col != rookCol; col += direction)
         {
             if (board.GetPiece(new Position(row, col)) != null)
@@ -67,16 +67,11 @@ public static class CastlingMoveGenerator
         // Проверяем, не атакованы ли клетки, которые король пересекает или занимает
         // (король не должен проходить через битое поле)
         var checkPositions = new List<Position> { kingPos };
-        if (kingSide)
-        {
-            checkPositions.Add(new Position(row, 5));
-            checkPositions.Add(new Position(row, 6));
-        }
-        else
-        {
-            checkPositions.Add(new Position(row, 3));
-            checkPositions.Add(new Position(row, 2));
-        }
+        int startCol = kingSide ? 5 : 3;
+        int endCol = kingSide ? 6 : 2;
+        int step = kingSide ? 1 : -1;
+        for (int col = startCol; kingSide ? col <= endCol : col >= endCol; col += step)
+            checkPositions.Add(new Position(row, col));
 
         foreach (var pos in checkPositions)
         {
@@ -98,10 +93,10 @@ public static class CastlingMoveGenerator
 }
 
 /// <summary>
-/// Сторона рокировки.
+/// Метод расширения для получения противоположного цвета.
 /// </summary>
-public enum CastlingSide
+public static class PieceColorExtensions
 {
-    KingSide,
-    QueenSide
+    public static PieceColor Opposite(this PieceColor color) =>
+        color == PieceColor.White ? PieceColor.Black : PieceColor.White;
 }

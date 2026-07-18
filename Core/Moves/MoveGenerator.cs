@@ -50,7 +50,9 @@ public static class MoveGenerator
         if (piece.Type == PieceType.Volkhv)
         {
             var positions = LinearMoveGenerator.GetMoves(board, from, Directions.QueenDirections, 1);
-            return [.. positions.Select(pos => new Move(from, pos))];
+            var moves = positions.Select(pos => new Move(from, pos)).ToList();
+            moves.AddRange(CastlingMoveGenerator.GetCastlingMoves(board, piece.Color));
+            return moves;
         }
 
         // Линейные фигуры (ладья, слон, князь)

@@ -12,9 +12,13 @@ public class ChessBoard
     private readonly Piece?[,] _squares;
 
     // Права на рокировку (доступны только для чтения, изменяются через методы)
+    /// <summary>Может ли белый сделать короткую рокировку (с королевской стороны).</summary>
     public bool WhiteCanCastleKingSide { get; private set; }
+    /// <summary>Может ли белый сделать длинную рокировку (с ферзевой стороны).</summary>
     public bool WhiteCanCastleQueenSide { get; private set; }
+    /// <summary>Может ли чёрный сделать короткую рокировку.</summary>
     public bool BlackCanCastleKingSide { get; private set; }
+    /// <summary>Может ли чёрный сделать длинную рокировку.</summary>
     public bool BlackCanCastleQueenSide { get; private set; }
 
     // Конструкторы по умолчанию устанавливают все права в true
