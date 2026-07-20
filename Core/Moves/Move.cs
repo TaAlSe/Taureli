@@ -7,10 +7,15 @@ namespace Core.Moves;
 /// </summary>
 public class Move(Position from, Position to, PieceType? promotionType = null)
 {
+    /// <summary>Начальная позиция хода.</summary>
     public Position From { get; } = from;
+    /// <summary>Конечная позиция хода.</summary>
     public Position To { get; } = to;
+    /// <summary>Тип фигуры для превращения (если применимо).</summary>
     public PieceType? PromotionType { get; } = promotionType;
+    /// <summary>Флаг, указывающий, является ли ход рокировкой.</summary>
     public bool IsCastling { get; init; } = false;
+    /// <summary>Сторона рокировки (короткая/длинная), если IsCastling == true.</summary>
     public CastlingSide? CastlingSide { get; init; } = null;
 
     public override bool Equals(object? obj)
