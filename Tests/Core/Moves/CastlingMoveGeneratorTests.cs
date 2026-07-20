@@ -32,12 +32,12 @@ public class CastlingMoveGeneratorTests
     [Fact]
     public void WhiteKingSideCastling_NotAllowed_WhenKingMoved()
     {
-        var board = new ChessBoard();
+        var board = new ChessBoard(
+            whiteCanCastleKingSide: false,
+            whiteCanCastleQueenSide: false
+        );
         board.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
         board.SetPiece(new Position(0, 7), new Piece(PieceType.Ratoborets, PieceColor.White));
-        // Имитируем, что король двигался – сбрасываем право
-        board.WhiteCanCastleKingSide = false;
-        board.WhiteCanCastleQueenSide = false;
 
         var moves = CastlingMoveGenerator.GetCastlingMoves(board, PieceColor.White);
         Assert.Empty(moves);
@@ -49,10 +49,11 @@ public class CastlingMoveGeneratorTests
     [Fact]
     public void WhiteKingSideCastling_NotAllowed_WhenRookMoved()
     {
-        var board = new ChessBoard();
+        var board = new ChessBoard(
+            whiteCanCastleKingSide: false // только короткая сброшена
+        );
         board.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
         board.SetPiece(new Position(0, 7), new Piece(PieceType.Ratoborets, PieceColor.White));
-        board.WhiteCanCastleKingSide = false; // ладья сдвинулась
 
         var moves = CastlingMoveGenerator.GetCastlingMoves(board, PieceColor.White);
         Assert.Empty(moves);

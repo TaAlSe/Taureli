@@ -21,7 +21,7 @@ public static class CastlingMoveGenerator
         // Проверяем, что на месте короля действительно стоит король нужного цвета
         var king = board.GetPiece(kingPos);
         if (king == null || king.Type != PieceType.Volkhv || king.Color != color)
-            return moves; // или throw new InvalidOperationException("Король не найден на своей начальной позиции");
+            return moves;
 
         var opponentColor = color.Opposite();
 
@@ -68,7 +68,6 @@ public static class CastlingMoveGenerator
         }
 
         // Проверяем, не атакованы ли клетки, которые король пересекает или занимает
-        // (король не должен проходить через битое поле)
         var checkPositions = new List<Position> { kingPos };
         int startCol = kingSide ? 5 : 3;
         int endCol = kingSide ? 6 : 2;
