@@ -37,23 +37,26 @@ public static class CastlingMoveGenerator
             return moves;
 
         // Короткая рокировка
-        if (canCastleKingSide && CanCastle(board, row, kingPos, opponentColor, true))
+        if (canCastleKingSide && CanCastle(board, row, kingPos, true))
             moves.Add(CreateCastlingMove(kingPos, row, 6, CastlingSide.KingSide));
 
         // Длинная рокировка
-        if (canCastleQueenSide && CanCastle(board, row, kingPos, opponentColor, false))
+        if (canCastleQueenSide && CanCastle(board, row, kingPos, false))
             moves.Add(CreateCastlingMove(kingPos, row, 2, CastlingSide.QueenSide));
 
         return moves;
     }
 
-    private static bool CanCastle(ChessBoard board, int row, Position kingPos, PieceColor opponentColor, bool kingSide)
+    private static bool CanCastle(ChessBoard board, int row, Position kingPos, bool kingSide)
     {
         int rookCol = kingSide ? 7 : 0;
         var rookPos = new Position(row, rookCol);
         var rook = board.GetPiece(rookPos);
+
         var color = row == 0 ? PieceColor.White : PieceColor.Black;
-        if (rook == null || rook.Type != PieceType.Ratoborets || rook.Color != color) // опечатка: нужно использовать color, но color у нас нет
+        var opponentColor = color.Opposite();
+
+        if (rook == null || rook.Type != PieceType.Ratoborets || rook.Color != color)
             return false;
 
         // Проверяем, свободны ли промежуточные клетки
@@ -90,13 +93,4 @@ public static class CastlingMoveGenerator
             CastlingSide = side
         };
     }
-}
-
-/// <summary>
-/// Метод расширения для получения противоположного цвета.
-/// </summary>
-public static class PieceColorExtensions
-{
-    public static PieceColor Opposite(this PieceColor color) =>
-        color == PieceColor.White ? PieceColor.Black : PieceColor.White;
 }

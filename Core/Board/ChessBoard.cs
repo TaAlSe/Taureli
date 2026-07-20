@@ -50,6 +50,11 @@ public class ChessBoard
         }
     }
 
+    /// <summary>
+    /// Обновляет права на рокировку в зависимости от того, на какой клетке находится ладья.
+    /// Если позиция совпадает с начальной клеткой ладьи, соответствующее право сбрасывается.
+    /// </summary>
+    /// <param name="pos">Позиция, которую нужно проверить (начальная или конечная клетка хода).</param>
     private void CheckRookPosition(Position pos)
     {
         (WhiteCanCastleQueenSide, WhiteCanCastleKingSide, BlackCanCastleQueenSide, BlackCanCastleKingSide) = pos switch
