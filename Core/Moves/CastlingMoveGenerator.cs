@@ -47,6 +47,14 @@ public static class CastlingMoveGenerator
         return moves;
     }
 
+    /// <summary>
+    /// Проверяет, может ли быть выполнена рокировка (короткая или длинная) для данного цвета.
+    /// </summary>
+    /// <param name="board">Текущая доска.</param>
+    /// <param name="row">Номер горизонтали короля (0 для белых, 7 для чёрных).</param>
+    /// <param name="kingPos">Позиция короля.</param>
+    /// <param name="kingSide">true для короткой (королевской) рокировки, false для длинной (ферзевой).</param>
+    /// <returns>true, если рокировка возможна.</returns>
     private static bool CanCastle(ChessBoard board, int row, Position kingPos, bool kingSide)
     {
         int rookCol = kingSide ? 7 : 0;
@@ -84,6 +92,14 @@ public static class CastlingMoveGenerator
         return true;
     }
 
+    /// <summary>
+    /// Создаёт объект Move, представляющий рокировку.
+    /// </summary>
+    /// <param name="from">Позиция короля до рокировки.</param>
+    /// <param name="row">Горизонталь короля (0 для белых, 7 для чёрных).</param>
+    /// <param name="col">Конечная позиция короля (6 для короткой, 2 для длинной).</param>
+    /// <param name="side">Сторона рокировки.</param>
+    /// <returns>Объект Move с установленными флагами IsCastling и CastlingSide.</returns>
     private static Move CreateCastlingMove(Position from, int row, int col, CastlingSide side)
     {
         return new Move(from, new Position(row, col), null)
