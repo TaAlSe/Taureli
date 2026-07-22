@@ -19,43 +19,42 @@ public static class MoveValidator
     /// <returns>true, если ход легален.</returns>
     public static bool IsLegalMove(ChessBoard board, Move move, PieceColor currentColor)
     {
-        // 1. Получаем фигуру на начальной клетке
+        // 1. Проверяем, что фигура существует и соответствует цвету
         var movingPiece = board.GetPiece(move.From);
         if (movingPiece == null || movingPiece.Color != currentColor)
-            return false; // нет фигуры или не та цвет
+            return false;
 
-        // 2. Сохраняем состояние для отката
+        // 2. Проверяем, что ход допустим по правилам движения (генератор ходов)
+        var possibleMoves = MoveGenerator.GetMovesForPiece(board, move.From);
+        if (!possibleMoves.Any(m => m.Equals(move)))
+            return false;
+
+        // 3. Сохраняем состояние для отката
         var capturedPiece = board.GetPiece(move.To);
         PieceType? promotionType = move.PromotionType;
 
-        // 3. Выполняем ход временно
-        // Если есть превращение, ставим новую фигуру, иначе перемещаем
+        // 4. Выполняем ход временно
         if (promotionType.HasValue)
         {
-            // Пешка превращается в указанную фигуру
             board.SetPiece(move.To, new Piece(promotionType.Value, currentColor));
         }
         else
         {
-            // Обычный ход
             board.SetPiece(move.To, movingPiece);
         }
         board.SetPiece(move.From, null);
-        
-        // 4. Находим позицию короля текущего игрока
-        Position? kingPos = FindKing(board, currentColor);
+
+        // 5. Проверяем, не остался ли король под шахом
+        var kingPos = FindKing(board, currentColor);
         bool isLegal = false;
         if (kingPos.HasValue)
         {
-            // Проверяем, атакован ли король фигурами противника
-            PieceColor opponentColor = currentColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
+            var opponentColor = currentColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
             isLegal = !AttackDetector.IsSquareAttacked(board, kingPos.Value, opponentColor);
         }
 
-        // 5. Откатываем ход
-        // Восстанавливаем пешку на From
+        // 6. Откатываем ход
         board.SetPiece(move.From, movingPiece);
-        // Восстанавливаем фигуру на To (если была)
         board.SetPiece(move.To, capturedPiece);
 
         return isLegal;

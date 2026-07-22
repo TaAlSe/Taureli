@@ -188,9 +188,6 @@ public class ChessBoard
         if (movingPiece == null)
             return false;
 
-        // 3. Сохраняем фигуру на клетке назначения (для отката не нужно, это постоянное изменение)
-        var capturedPiece = GetPiece(move.To);
-
         // 4. Выполняем ход в зависимости от типа
         if (move.IsCastling)
         {
@@ -212,6 +209,7 @@ public class ChessBoard
 
         // 5. Обновляем права рокировки
         UpdateCastlingRights(move);
+        // todo: обновить состояние для взятия на проходе
 
         // 6. (Позже) Обновляем состояние для взятия на проходе и т.д.
         return true;
