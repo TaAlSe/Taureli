@@ -17,12 +17,14 @@ public static class MoveValidator
     /// <param name="move">Проверяемый ход.</param>
     /// <param name="currentColor">Цвет игрока, совершающего ход.</param>
     /// <returns>true, если ход легален.</returns>
-    public static bool IsLegalMove(ChessBoard board, Move move, PieceColor currentColor)
+    public static bool IsLegalMove(ChessBoard board, Move move)
     {
         // 1. Проверяем, что фигура существует и соответствует цвету
         var movingPiece = board.GetPiece(move.From);
-        if (movingPiece == null || movingPiece.Color != currentColor)
+        if (movingPiece == null)
             return false;
+
+        var currentColor = movingPiece.Color;
 
         // 2. Проверяем, что ход допустим по правилам движения (генератор ходов)
         var possibleMoves = MoveGenerator.GetMovesForPiece(board, move.From);
@@ -81,13 +83,13 @@ public static class MoveValidator
     /// <summary>
     /// Возвращает все легальные ходы для фигуры на заданной позиции.
     /// </summary>
-    public static List<Move> GetLegalMoves(ChessBoard board, Position from, PieceColor currentColor)
+    public static List<Move> GetLegalMoves(ChessBoard board, Position from)
     {
         var allMoves = MoveGenerator.GetMovesForPiece(board, from);
         var legalMoves = new List<Move>();
         foreach (var move in allMoves)
         {
-            if (IsLegalMove(board, move, currentColor))
+            if (IsLegalMove(board, move))
                 legalMoves.Add(move);
         }
         return legalMoves;

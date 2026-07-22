@@ -175,18 +175,19 @@ public class ChessBoard
     /// Выполняет ход на доске (постоянное изменение состояния).
     /// </summary>
     /// <param name="move">Ход, который нужно выполнить.</param>
-    /// <param name="currentColor">Цвет игрока, совершающего ход.</param>
     /// <returns>true, если ход был выполнен успешно.</returns>
-    public bool MakeMove(Move move, PieceColor currentColor)
+    public bool MakeMove(Move move)
     {
-        // 1. Проверяем легальность
-        if (!MoveValidator.IsLegalMove(this, move, currentColor))
-            return false;
-
         // 2. Получаем фигуру, которая ходит
         var movingPiece = GetPiece(move.From);
         if (movingPiece == null)
             return false;
+
+        // 1. Проверяем легальность
+        if (!MoveValidator.IsLegalMove(this, move))
+            return false;
+
+        var currentColor = movingPiece.Color;
 
         // 4. Выполняем ход в зависимости от типа
         if (move.IsCastling)

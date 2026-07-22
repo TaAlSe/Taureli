@@ -15,7 +15,7 @@ public class MoveValidatorTests
     {
         var board = new ChessBoard(PieceFactory.StartingPosition());
         var move = new Move(new Position(1, 4), new Position(2, 4));
-        Assert.True(MoveValidator.IsLegalMove(board, move, PieceColor.White));
+        Assert.True(MoveValidator.IsLegalMove(board, move));
     }
 
     /// <summary>
@@ -32,7 +32,7 @@ public class MoveValidatorTests
         board.SetPiece(new Position(3, 7), new Piece(PieceType.Archer, PieceColor.Black));
 
         var move = new Move(new Position(1, 5), new Position(2, 5));
-        Assert.False(MoveValidator.IsLegalMove(board, move, PieceColor.White));
+        Assert.False(MoveValidator.IsLegalMove(board, move));
     }
 
     /// <summary>
@@ -47,7 +47,18 @@ public class MoveValidatorTests
         board.SetPiece(new Position(1, 5), new Piece(PieceType.Ratnik, PieceColor.White));
         board.SetPiece(new Position(3, 7), new Piece(PieceType.Archer, PieceColor.Black));
 
-        var legalMoves = MoveValidator.GetLegalMoves(board, new Position(1, 5), PieceColor.White);
+        var legalMoves = MoveValidator.GetLegalMoves(board, new Position(1, 5));
         Assert.Empty(legalMoves);
+    }
+
+    /// <summary>
+    /// Проверяет, что нелегальный ход (пешка горизонтально) не проходит валидацию.
+    /// </summary>
+    [Fact]
+    public void IllegalPawnMove_Horizontal_IsNotLegal()
+    {
+        var board = new ChessBoard(PieceFactory.StartingPosition());
+        var illegalMove = new Move(new Position(1, 4), new Position(1, 5)); // e2-f2
+        Assert.False(MoveValidator.IsLegalMove(board, illegalMove));
     }
 }
