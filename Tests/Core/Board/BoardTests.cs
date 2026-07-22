@@ -91,4 +91,24 @@ public class BoardTests
         Assert.Throws<ArgumentException>(() => board.SetPiece(8, 4, new Piece(PieceType.Ratnik, PieceColor.White)));
         Assert.Throws<ArgumentException>(() => board.SetPiece(new Position(8, 4), new Piece(PieceType.Ratnik, PieceColor.White)));
     }
+
+    [Fact]
+    public void MakeMove_SimpleMove_UpdatesBoard()
+    {
+        var board = new ChessBoard(PieceFactory.StartingPosition());
+        var move = new Move(new Position(1, 4), new Position(2, 4)); // e2-e3
+        bool result = board.MakeMove(move, PieceColor.White);
+        Assert.True(result);
+        Assert.NotNull(board.GetPiece(new Position(2, 4)));
+        Assert.Null(board.GetPiece(new Position(1, 4)));
+    }
+
+    [Fact]
+    public void MakeMove_IllegalMove_ReturnsFalse()
+    {
+        var board = new ChessBoard(PieceFactory.StartingPosition());
+        var move = new Move(new Position(1, 4), new Position(1, 5)); // e2-f2? нелегально для пешки
+        bool result = board.MakeMove(move, PieceColor.White);
+        Assert.False(result);
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using Core.Moves;
-using Core.Pieces;  // чтобы использовать Piece, PieceColor, PieceType
+using Core.Pieces;
+using Core.Validation;
 
 namespace Core.Board;
 
@@ -169,4 +170,82 @@ public class ChessBoard
         sb.AppendLine("   a  b  c  d  e  f  g  h");
         return sb.ToString();
     }
+
+    /// <summary>
+    /// Выполняет ход на доске (постоянное изменение состояния).
+    /// </summary>
+    /// <param name="move">Ход, который нужно выполнить.</param>
+    /// <param name="currentColor">Цвет игрока, совершающего ход.</param>
+    /// <returns>true, если ход был выполнен успешно.</returns>
+    public bool MakeMove(Move move, PieceColor currentColor)
+    {
+        // 1. Проверяем легальность
+        if (!MoveValidator.IsLegalMove(this, move, currentColor))
+            return false;
+
+        // 2. Получаем фигуру, которая ходит
+        var movingPiece = GetPiece(move.From);
+        if (movingPiece == null)
+            return false;
+
+        // 3. Сохраняем фигуру на клетке назначения (для отката не нужно, это постоянное изменение)
+        var capturedPiece = GetPiece(move.To);
+
+        // 4. Выполняем ход в зависимости от типа
+        if (move.IsCastling)
+        {
+            // Рокировка
+            ExecuteCastling(move, currentColor);
+        }
+        else if (move.PromotionType.HasValue)
+        {
+            // Превращение пешки
+            SetPiece(move.To, new Piece(move.PromotionType.Value, currentColor));
+            SetPiece(move.From, null);
+        }
+        else
+        {
+            // Обычный ход
+            SetPiece(move.To, movingPiece);
+            SetPiece(move.From, null);
+        }
+
+        // 5. Обновляем права рокировки
+        UpdateCastlingRights(move);
+
+        // 6. (Позже) Обновляем состояние для взятия на проходе и т.д.
+        return true;
+    }
+
+    /// <summary>
+    /// Выполняет рокировку (перемещает короля и ладью).
+    /// </summary>
+    private void ExecuteCastling(Move move, PieceColor color)
+    {
+        int row = color == PieceColor.White ? 0 : 7;
+        // Перемещаем короля
+        var king = GetPiece(move.From);
+        if (king != null)
+        {
+            SetPiece(move.To, king);
+            SetPiece(move.From, null);
+        }
+        // Перемещаем ладью
+        int rookFromCol = move.CastlingSide == CastlingSide.KingSide ? 7 : 0;
+        int rookToCol = move.CastlingSide == CastlingSide.KingSide ? 5 : 3;
+        var rook = GetPiece(new Position(row, rookFromCol));
+        if (rook != null)
+        {
+            SetPiece(new Position(row, rookToCol), rook);
+            SetPiece(new Position(row, rookFromCol), null);
+        }
+    }
+}
+
+public interface IBoard
+{
+    Piece? GetTopPiece(Position pos);
+    void SetTopPiece(Position pos, Piece? piece);
+    bool MakeMove(Move move, PieceColor currentColor);
+    // Позже могут добавиться методы для работы со стеками
 }
