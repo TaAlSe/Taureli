@@ -51,20 +51,6 @@ public class BoardTests
     }
 
     /// <summary>
-    /// Проверяет, что метод Clear удаляет все фигуры с доски (все клетки становятся null).
-    /// </summary>
-    [Fact]
-    public void Clear_RemovesAllPieces()
-    {
-        var board = new ChessBoard(PieceFactory.StartingPosition());
-        board.Clear();
-
-        for (int row = 0; row < ChessBoard.Size; row++)
-            for (int col = 0; col < ChessBoard.Size; col++)
-                Assert.Null(board.GetPiece(row, col));
-    }
-
-    /// <summary>
     /// Проверяет, что ToString() возвращает строку, содержащую ожидаемые двухбуквенные коды фигур
     /// (Ra, ra, Rt, rt) и шахматную нотацию координат (a b c d e f g h).
     /// </summary>

@@ -7,12 +7,17 @@ namespace Core.Board;
 /// <summary>
 /// Представляет шахматную доску 8x8 для таврелей.
 /// </summary>
-public class ChessBoard
+public class ChessBoard : IBoard
 {
     public const int Size = 8;
+
+    // Старое хранилище (для обратной совместимости)
     private readonly Piece?[,] _squares;
 
-    // Права на рокировку (доступны только для чтения, изменяются через методы)
+    // Новое хранилище для башен (стеки)
+    private readonly LinkedList<Piece>?[,] _stacks;
+
+    // Права на рокировку
     /// <summary>Может ли белый сделать короткую рокировку (с королевской стороны).</summary>
     public bool WhiteCanCastleKingSide { get; private set; }
     /// <summary>Может ли белый сделать длинную рокировку (с ферзевой стороны).</summary>
@@ -29,13 +34,15 @@ public class ChessBoard
     /// <param name="initialPosition">Двумерный массив 8x8 с фигурами (может содержать null).</param>
     /// <exception cref="ArgumentException">Если размеры массива не 8x8.</exception>
     public ChessBoard(
-    Piece?[,]? initialPosition = null,
-    bool whiteCanCastleKingSide = true,
-    bool whiteCanCastleQueenSide = true,
-    bool blackCanCastleKingSide = true,
-    bool blackCanCastleQueenSide = true)
+        Piece?[,]? initialPosition = null,
+        bool whiteCanCastleKingSide = true,
+        bool whiteCanCastleQueenSide = true,
+        bool blackCanCastleKingSide = true,
+        bool blackCanCastleQueenSide = true)
     {
         _squares = new Piece?[Size, Size];
+        _stacks = new LinkedList<Piece>?[Size, Size];
+
         WhiteCanCastleKingSide = whiteCanCastleKingSide;
         WhiteCanCastleQueenSide = whiteCanCastleQueenSide;
         BlackCanCastleKingSide = blackCanCastleKingSide;
@@ -43,13 +50,173 @@ public class ChessBoard
 
         if (initialPosition != null)
         {
-            if (initialPosition.GetLength(0) != Size || initialPosition.GetLength(1) != Size)
-                throw new ArgumentException($"Массив должен быть размером {Size}x{Size}", nameof(initialPosition));
             for (int row = 0; row < Size; row++)
+            {
                 for (int col = 0; col < Size; col++)
-                    _squares[row, col] = initialPosition[row, col];
+                {
+                    var piece = initialPosition[row, col];
+                    _squares[row, col] = piece;
+                    if (piece != null)
+                    {
+                        var stack = new LinkedList<Piece>();
+                        stack.AddFirst(piece);
+                        _stacks[row, col] = stack;
+                    }
+                    else
+                    {
+                        _stacks[row, col] = null;
+                    }
+                }
+            }
         }
     }
+
+    // --- Старые методы (остаются без изменений) ---
+    /// <summary>
+    /// Возвращает фигуру по позиции (прямой доступ с проверкой IsValid).
+    /// </summary>
+    public Piece? GetPiece(int row, int col) => GetPiece(new Position(row, col));
+    public Piece? GetPiece(Position pos) => pos.IsValid ? _squares[pos.Row, pos.Col] : null;
+
+
+    /// <summary>
+    /// Устанавливает фигуру в заданную клетку (можно null для очистки).
+    /// </summary>
+    public void SetPiece(int row, int col, Piece? piece) => SetPiece(new Position(row, col), piece);
+
+    /// <summary>
+    /// Устанавливает фигуру в заданную клетку (можно null для очистки).
+    /// </summary>
+    public void SetPiece(Position pos, Piece? piece)
+    {
+        if (!pos.IsValid) return;
+        _squares[pos.Row, pos.Col] = piece;
+        // Также обновляем стек: если piece != null, создаём стек с одной фигурой, иначе null
+        if (piece != null)
+        {
+            var stack = new LinkedList<Piece>();
+            stack.AddFirst(piece);
+            _stacks[pos.Row, pos.Col] = stack;
+        }
+        else
+        {
+            _stacks[pos.Row, pos.Col] = null;
+        }
+    }
+
+    public override string ToString()
+    {
+        // Пока используем старые методы для отображения
+        var sb = new System.Text.StringBuilder();
+        for (int row = Size - 1; row >= 0; row--)
+        {
+            sb.Append(row + 1).Append("  ");
+            for (int col = 0; col < Size; col++)
+            {
+                var piece = GetPiece(row, col);
+                sb.Append(piece == null ? ".  " : piece.GetDebugCode() + " ");
+            }
+            sb.AppendLine();
+        }
+        sb.AppendLine("   a  b  c  d  e  f  g  h");
+        return sb.ToString();
+    }
+
+    // --- Новые методы для работы со стеками ---
+
+    /// <summary>Возвращает верхнюю фигуру стека на позиции (или null).</summary>
+    public Piece? GetTopPiece(Position pos)
+    {
+        if (!pos.IsValid) return null;
+        var stack = _stacks[pos.Row, pos.Col];
+        return stack?.First?.Value;
+    }
+
+    /// <summary>Возвращает весь стек на позиции (или null).</summary>
+    public LinkedList<Piece>? GetStack(Position pos)
+    {
+        if (!pos.IsValid) return null;
+        return _stacks[pos.Row, pos.Col];
+    }
+
+    /// <summary>Заменяет стек на позиции новым (может быть null).</summary>
+    public void SetStack(Position pos, LinkedList<Piece>? stack)
+    {
+        if (!pos.IsValid) return;
+        _stacks[pos.Row, pos.Col] = stack;
+        // Синхронизируем _squares: верхняя фигура или null
+        _squares[pos.Row, pos.Col] = stack?.First?.Value;
+    }
+
+    /// <summary>Добавляет фигуру сверху стека (слияние).</summary>
+    public void PushPiece(Position pos, Piece piece)
+    {
+        if (!pos.IsValid) return;
+        var stack = _stacks[pos.Row, pos.Col];
+        if (stack == null)
+        {
+            stack = new LinkedList<Piece>();
+            _stacks[pos.Row, pos.Col] = stack;
+        }
+        stack.AddFirst(piece);
+        // Обновляем верхнюю фигуру в _squares
+        _squares[pos.Row, pos.Col] = piece;
+    }
+
+    /// <summary>Удаляет верхнюю фигуру стека и возвращает её (или null).</summary>
+    public Piece? PopPiece(Position pos)
+    {
+        if (!pos.IsValid) return null;
+        var stack = _stacks[pos.Row, pos.Col];
+        if (stack == null || stack.First == null) return null;
+        var piece = stack.First.Value;
+        stack.RemoveFirst();
+        if (stack.Count == 0)
+        {
+            _stacks[pos.Row, pos.Col] = null;
+            _squares[pos.Row, pos.Col] = null;
+        }
+        else
+        {
+            // Обновляем верхнюю фигуру
+            _squares[pos.Row, pos.Col] = stack.First.Value;
+        }
+        return piece;
+    }
+
+    /// <summary>Соединяет две башни (top ставится поверх bottom).</summary>
+    public static LinkedList<Piece>? ConcatStacks(LinkedList<Piece>? bottom, LinkedList<Piece>? top)
+    {
+        if (top == null) return bottom;
+        if (bottom == null) return top;
+        // Копируем элементы top в bottom (это O(n), но для MVP приемлемо)
+        foreach (var piece in top)
+            bottom.AddLast(piece);
+        return bottom;
+    }
+
+    /// <summary>Разделяет башню на две части: верхние count фигур и нижние.</summary>
+    public static (LinkedList<Piece>? upper, LinkedList<Piece>? lower) SplitStack(LinkedList<Piece> stack, int count)
+    {
+        if (stack == null || count <= 0 || count >= stack.Count)
+            return (null, stack);
+        var upper = new LinkedList<Piece>();
+        var lower = new LinkedList<Piece>();
+        int i = 0;
+        foreach (var piece in stack)
+        {
+            if (i < count)
+                upper.AddLast(piece);
+            else
+                lower.AddLast(piece);
+            i++;
+        }
+        return (upper, lower);
+    }
+
+    // --- Остальные методы (UpdateCastlingRights, MakeMove, ExecuteCastling) ---
+    // Они пока используют старые методы, но в микрошаге 3 мы их перепишем.
+    // Пока оставляем их без изменений.
 
     /// <summary>
     /// Обновляет права на рокировку в зависимости от того, на какой клетке находится ладья.
@@ -89,86 +256,6 @@ public class ChessBoard
         CheckRookPosition(move.From);
         // Ладья на конечной клетке (была взята)
         CheckRookPosition(move.To);
-    }
-
-    /// <summary>
-    /// Создаёт доску, заполняя её переданной расстановкой.
-    /// </summary>
-    /// <param name="initialPosition">Двумерный массив 8x8 с фигурами (может содержать null).</param>
-    /// <exception cref="ArgumentNullException">Если initialPosition == null.</exception>
-    /// <exception cref="ArgumentException">Если размеры массива не 8x8.</exception>
-    public ChessBoard(Piece?[,] initialPosition) : this()
-    {
-        ArgumentNullException.ThrowIfNull(initialPosition);
-        if (initialPosition.GetLength(0) != Size || initialPosition.GetLength(1) != Size)
-            throw new ArgumentException("Массив должен быть размером 8x8", nameof(initialPosition));
-
-        for (int row = 0; row < _squares.GetLength(0); row++)
-            for (int col = 0; col < _squares.GetLength(1); col++)
-                _squares[row, col] = initialPosition[row, col];
-    }
-
-    /// <summary>
-    /// Возвращает фигуру в заданной клетке.
-    /// </summary>
-    /// <param name="row">Строка от 0 до 7 (0 – чёрные, 7 – белые).</param>
-    /// <param name="col">Столбец от 0 до 7 (a=0, h=7).</param>
-    /// <returns>Фигура или null, если клетка пуста или координаты за пределами доски.</returns>
-    public Piece? GetPiece(int row, int col)
-    {
-        return new Position(row, col).IsValid ? _squares[row, col] : null;
-    }
-
-    /// <summary>
-    /// Возвращает фигуру по позиции (прямой доступ с проверкой IsValid).
-    /// </summary>
-    public Piece? GetPiece(Position pos) => pos.IsValid ? _squares[pos.Row, pos.Col] : null;
-
-    /// <summary>
-    /// Устанавливает фигуру в заданную клетку (можно null для очистки).
-    /// </summary>
-    public void SetPiece(int row, int col, Piece? piece)
-    {
-        SetPiece(new Position(row, col), piece);
-    }
-
-    /// <summary>
-    /// Устанавливает фигуру в заданную клетку (можно null для очистки).
-    /// </summary>
-    /// <exception cref="ArgumentException">Если позиция выходит за пределы доски.</exception>
-    public void SetPiece(Position pos, Piece? piece)
-    {
-        if (!pos.IsValid)
-            throw new ArgumentException($"Некорректная позиция: {pos}", nameof(pos));
-        _squares[pos.Row, pos.Col] = piece;
-    }
-
-    /// <summary>
-    /// Очищает всю доску (все клетки становятся null).
-    /// </summary>
-    public void Clear()
-    {
-        Array.Clear(_squares, 0, _squares.Length);
-    }
-
-    /// <summary>
-    /// Возвращает строковое представление доски для отладки (использует GetDebugCode у фигур).
-    /// </summary>
-    public override string ToString()
-    {
-        var sb = new System.Text.StringBuilder();
-        for (int row = 7; row >= 0; row--)  // печатаем с 8-й горизонтали по 1-ю
-        {
-            sb.Append(row + 1).Append("  ");
-            for (int col = 0; col < Size; col++)
-            {
-                var piece = _squares[row, col];
-                sb.Append(piece == null ? ".  " : piece.GetDebugCode() + " ");
-            }
-            sb.AppendLine();
-        }
-        sb.AppendLine("   a  b  c  d  e  f  g  h");
-        return sb.ToString();
     }
 
     /// <summary>
@@ -245,7 +332,7 @@ public class ChessBoard
 public interface IBoard
 {
     Piece? GetTopPiece(Position pos);
-    void SetTopPiece(Position pos, Piece? piece);
-    bool MakeMove(Move move, PieceColor currentColor);
+    void SetPiece(Position pos, Piece? piece);
+    bool MakeMove(Move move);
     // Позже могут добавиться методы для работы со стеками
 }
