@@ -178,18 +178,18 @@ public class ChessBoard
     /// <returns>true, если ход был выполнен успешно.</returns>
     public bool MakeMove(Move move)
     {
-        // 2. Получаем фигуру, которая ходит
+        // 1. Получаем фигуру, которая ходит
         var movingPiece = GetPiece(move.From);
         if (movingPiece == null)
             return false;
 
-        // 1. Проверяем легальность
+        // 2. Проверяем легальность (включает проверку генерации и шаха)
         if (!MoveValidator.IsLegalMove(this, move))
             return false;
 
         var currentColor = movingPiece.Color;
 
-        // 4. Выполняем ход в зависимости от типа
+        // 3. Выполняем ход в зависимости от типа
         if (move.IsCastling)
         {
             // Рокировка
@@ -208,11 +208,12 @@ public class ChessBoard
             SetPiece(move.From, null);
         }
 
-        // 5. Обновляем права рокировки
+        // 4. Обновляем права рокировки
         UpdateCastlingRights(move);
-        // todo: обновить состояние для взятия на проходе
 
-        // 6. (Позже) Обновляем состояние для взятия на проходе и т.д.
+        // todo: обновить состояние для взятия на проходе
+        // 5. (Позже) Обновляем состояние для взятия на проходе и превращения в хелги
+
         return true;
     }
 

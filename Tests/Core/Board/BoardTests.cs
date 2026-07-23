@@ -92,6 +92,9 @@ public class BoardTests
         Assert.Throws<ArgumentException>(() => board.SetPiece(new Position(8, 4), new Piece(PieceType.Ratnik, PieceColor.White)));
     }
 
+    /// <summary>
+    /// Проверяет, что метод MakeMove выполняет простой ход пешки (e2-e3) и корректно обновляет доску.
+    /// </summary>
     [Fact]
     public void MakeMove_SimpleMove_UpdatesBoard()
     {
@@ -103,6 +106,9 @@ public class BoardTests
         Assert.Null(board.GetPiece(new Position(1, 4)));
     }
 
+    /// <summary>
+    /// Проверяет, что метод MakeMove возвращает false для нелегального хода (пешка пытается пойти горизонтально).
+    /// </summary>
     [Fact]
     public void MakeMove_IllegalMove_ReturnsFalse()
     {
