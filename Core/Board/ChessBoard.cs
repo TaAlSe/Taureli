@@ -89,7 +89,8 @@ public class ChessBoard : IBoard
     /// </summary>
     public void SetPiece(Position pos, Piece? piece)
     {
-        if (!pos.IsValid) return;
+        if (!pos.IsValid)
+            throw new ArgumentException($"Некорректная позиция: {pos}", nameof(pos));
         _squares[pos.Row, pos.Col] = piece;
         // Также обновляем стек: если piece != null, создаём стек с одной фигурой, иначе null
         if (piece != null)
@@ -265,12 +266,12 @@ public class ChessBoard : IBoard
     /// <returns>true, если ход был выполнен успешно.</returns>
     public bool MakeMove(Move move)
     {
-        // 1. Получаем фигуру, которая ходит
-        var movingPiece = GetPiece(move.From);
+        // 1. Получаем верхнюю фигуру на начальной клетке
+        var movingPiece = GetTopPiece(move.From);
         if (movingPiece == null)
             return false;
 
-        // 2. Проверяем легальность (включает проверку генерации и шаха)
+        // 2. Проверяем легальность (используем старый валидатор, который пока работает с GetPiece)
         if (!MoveValidator.IsLegalMove(this, move))
             return false;
 
@@ -279,27 +280,29 @@ public class ChessBoard : IBoard
         // 3. Выполняем ход в зависимости от типа
         if (move.IsCastling)
         {
-            // Рокировка
             ExecuteCastling(move, currentColor);
         }
         else if (move.PromotionType.HasValue)
         {
-            // Превращение пешки
-            SetPiece(move.To, new Piece(move.PromotionType.Value, currentColor));
-            SetPiece(move.From, null);
+            // Превращение пешки: удаляем пешку с from, ставим новую фигуру на to
+            PopPiece(move.From);
+            PushPiece(move.To, new Piece(move.PromotionType.Value, currentColor));
         }
         else
         {
-            // Обычный ход
-            SetPiece(move.To, movingPiece);
-            SetPiece(move.From, null);
+            // Обычный ход: перемещаем верхнюю фигуру
+            var piece = PopPiece(move.From);
+            if (piece != null)
+            {
+                // Если на целевой клетке уже есть стек, то PushPiece добавит сверху
+                PushPiece(move.To, piece);
+            }
         }
 
-        // 4. Обновляем права рокировки
+        // 4. Обновляем права рокировки (они не зависят от стеков, работают с позициями)
         UpdateCastlingRights(move);
 
-        // todo: обновить состояние для взятия на проходе
-        // 5. (Позже) Обновляем состояние для взятия на проходе и превращения в хелги
+        // todo: обновить состояние для взятия на проходе и превращения в хелги
 
         return true;
     }
@@ -311,20 +314,18 @@ public class ChessBoard : IBoard
     {
         int row = color == PieceColor.White ? 0 : 7;
         // Перемещаем короля
-        var king = GetPiece(move.From);
+        var king = PopPiece(move.From);
         if (king != null)
         {
-            SetPiece(move.To, king);
-            SetPiece(move.From, null);
+            PushPiece(move.To, king);
         }
         // Перемещаем ладью
         int rookFromCol = move.CastlingSide == CastlingSide.KingSide ? 7 : 0;
         int rookToCol = move.CastlingSide == CastlingSide.KingSide ? 5 : 3;
-        var rook = GetPiece(new Position(row, rookFromCol));
+        var rook = PopPiece(new Position(row, rookFromCol));
         if (rook != null)
         {
-            SetPiece(new Position(row, rookToCol), rook);
-            SetPiece(new Position(row, rookFromCol), null);
+            PushPiece(new Position(row, rookToCol), rook);
         }
     }
 }
