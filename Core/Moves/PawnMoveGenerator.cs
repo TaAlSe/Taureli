@@ -17,7 +17,7 @@ public static class PawnMoveGenerator
     public static List<Move> GetMoves(ChessBoard board, Position from)
     {
         // Проверяем, что на указанной клетке действительно стоит пешка.
-        var piece = board.GetPiece(from);
+        var piece = board.GetTopPiece(from);
         if (piece == null || piece.Type != PieceType.Ratnik)
             return [];
 
@@ -36,14 +36,14 @@ public static class PawnMoveGenerator
         {
             // Позиция для хода.
             var targetPos = new Position(newRow, from.Col);
-            if (board.GetPiece(targetPos) == null)
+            if (board.GetTopPiece(targetPos) == null)
             {
                 // Ход с превращением, если достигли последней горизонтали (пока null).
                 moves.Add(new Move(from, targetPos));
             }
         }
 
-        // 2. Ход на 2 клетки с начальной позиции (если обе клетки пусты)
+        // 2. Ход на 2 клетки с начальной позиции
         if (from.Row == startRow)
         {
             // Целевая строка для двойного хода.
@@ -54,14 +54,14 @@ public static class PawnMoveGenerator
                 var intermediatePos = new Position(from.Row + direction, from.Col);
                 // Позиция для хода.
                 var targetPos = new Position(twoStepRow, from.Col);
-                if (board.GetPiece(intermediatePos) == null && board.GetPiece(targetPos) == null)
+                if (board.GetTopPiece(intermediatePos) == null && board.GetTopPiece(targetPos) == null)
                 {
                     moves.Add(new Move(from, targetPos));
                 }
             }
         }
 
-        // 3. Взятие по диагонали (влево и вправо)
+        // 3. Взятие по диагонали
         foreach (int colOffset in new[] { -1, 1 })
         {
             int targetCol = from.Col + colOffset;
@@ -71,7 +71,7 @@ public static class PawnMoveGenerator
             if (targetRow < 0 || targetRow >= 8) continue;
 
             var targetPos = new Position(targetRow, targetCol);
-            var targetPiece = board.GetPiece(targetPos);
+            var targetPiece = board.GetTopPiece(targetPos);
 
             // Взятие возможно только если на целевой клетке стоит вражеская фигура.
             if (targetPiece != null && targetPiece.Color != piece.Color)

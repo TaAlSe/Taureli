@@ -19,7 +19,7 @@ public static class CastlingMoveGenerator
         var kingPos = new Position(row, 4);
 
         // Проверяем, что на месте короля действительно стоит король нужного цвета
-        var king = board.GetPiece(kingPos);
+        var king = board.GetTopPiece(kingPos);
         if (king == null || king.Type != PieceType.Volkhv || king.Color != color)
             return moves;
 
@@ -59,7 +59,7 @@ public static class CastlingMoveGenerator
     {
         int rookCol = kingSide ? 7 : 0;
         var rookPos = new Position(row, rookCol);
-        var rook = board.GetPiece(rookPos);
+        var rook = board.GetTopPiece(rookPos);
 
         var color = row == 0 ? PieceColor.White : PieceColor.Black;
         var opponentColor = color.Opposite();
@@ -71,7 +71,7 @@ public static class CastlingMoveGenerator
         int direction = kingSide ? 1 : -1;
         for (int col = kingPos.Col + direction; col != rookCol; col += direction)
         {
-            if (board.GetPiece(new Position(row, col)) != null)
+            if (board.GetTopPiece(new Position(row, col)) != null)
                 return false;
         }
 

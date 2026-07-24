@@ -20,7 +20,7 @@ public static class MoveValidator
     public static bool IsLegalMove(ChessBoard board, Move move)
     {
         // 1. Проверяем, что фигура существует и соответствует цвету
-        var movingPiece = board.GetPiece(move.From);
+        var movingPiece = board.GetTopPiece(move.From);
         if (movingPiece == null)
             return false;
 
@@ -32,7 +32,7 @@ public static class MoveValidator
             return false;
 
         // 3. Сохраняем состояние для отката
-        var capturedPiece = board.GetPiece(move.To);
+        var capturedPiece = board.GetTopPiece(move.To);
         PieceType? promotionType = move.PromotionType;
 
         // 4. Выполняем ход временно
@@ -72,7 +72,7 @@ public static class MoveValidator
             for (int col = 0; col < 8; col++)
             {
                 var pos = new Position(row, col);
-                var piece = board.GetPiece(pos);
+                var piece = board.GetTopPiece(pos);
                 if (piece != null && piece.Type == PieceType.Volkhv && piece.Color == color)
                     return pos;
             }

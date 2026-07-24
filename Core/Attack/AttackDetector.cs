@@ -28,7 +28,7 @@ public static class AttackDetector
                 var target = new Position(row, col);
                 if (!target.IsValid) break;
 
-                var piece = board.GetPiece(target);
+                var piece = board.GetTopPiece(target);
                 if (piece == null) continue;
 
                 if (piece.Color != byColor)
@@ -47,7 +47,7 @@ public static class AttackDetector
         {
             var target = new Position(pos.Row + dRow, pos.Col + dCol);
             if (!target.IsValid) continue;
-            var piece = board.GetPiece(target);
+            var piece = board.GetTopPiece(target);
             if (piece != null && piece.Color == byColor &&
                 (piece.Type == PieceType.Horseman || piece.Type == PieceType.Helgi))
                 return true;
@@ -58,7 +58,7 @@ public static class AttackDetector
         {
             var target = new Position(pos.Row + dRow, pos.Col + dCol);
             if (!target.IsValid) continue;
-            var piece = board.GetPiece(target);
+            var piece = board.GetTopPiece(target);
             if (piece != null && piece.Color == byColor && piece.Type == PieceType.Volkhv)
                 return true;
         }
@@ -69,7 +69,7 @@ public static class AttackDetector
         {
             var target = new Position(pos.Row - pawnDirection, pos.Col + colOffset);
             if (!target.IsValid) continue;
-            var piece = board.GetPiece(target);
+            var piece = board.GetTopPiece(target);
             if (piece != null && piece.Color == byColor && piece.Type == PieceType.Ratnik)
                 return true;
         }

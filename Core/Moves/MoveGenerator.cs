@@ -23,7 +23,7 @@ public static class MoveGenerator
     /// <returns>Список доступных позиций для хода.</returns>
     public static List<Move> GetMovesForPiece(ChessBoard board, Position from)
     {
-        var piece = board.GetPiece(from.Row, from.Col);
+        var piece = board.GetTopPiece(new Position(from.Row, from.Col));
         if (piece == null) return [];
 
         // Специальные фигуры (нелинейные)

@@ -15,7 +15,7 @@ public static class LinearMoveGenerator
     public static List<Position> GetMoves(ChessBoard board, Position from, (int dRow, int dCol)[] directions, int maxDistance = 7)
     {
         var moves = new List<Position>();
-        var piece = board.GetPiece(from.Row, from.Col);
+        var piece = board.GetTopPiece(from);
         if (piece == null) return moves; // нет фигуры — нет ходов
 
         foreach (var (dRow, dCol) in directions)
@@ -27,7 +27,7 @@ public static class LinearMoveGenerator
                 var targetPos = new Position(newRow, newCol);
                 if (!targetPos.IsValid) break; // вышли за доску
 
-                var targetPiece = board.GetPiece(newRow, newCol);
+                var targetPiece = board.GetTopPiece(targetPos);
                 if (targetPiece == null)
                 {
                     // пустая клетка — можно идти

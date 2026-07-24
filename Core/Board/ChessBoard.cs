@@ -114,7 +114,7 @@ public class ChessBoard : IBoard
             sb.Append(row + 1).Append("  ");
             for (int col = 0; col < Size; col++)
             {
-                var piece = GetPiece(row, col);
+                var piece = GetTopPiece(new Position(row, col));
                 sb.Append(piece == null ? ".  " : piece.GetDebugCode() + " ");
             }
             sb.AppendLine();
