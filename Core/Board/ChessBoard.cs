@@ -238,11 +238,12 @@ public class ChessBoard : IBoard
     }
 
     /// <summary>
-    /// Выполняет ход на доске (постоянное изменение состояния).
+    /// Выполняет ход на доске.
     /// </summary>
     /// <param name="move">Ход, который нужно выполнить.</param>
-    /// <returns>true, если ход был выполнен успешно.</returns>
-    public bool MakeMove(Move move)
+    /// <param name="splitCount">Количество верхних фигур, которые нужно переместить (если null, перемещается вся башня).</param>
+    /// <returns>true, если ход выполнен успешно.</returns>
+    public bool MakeMove(Move move, int? splitCount = null)
     {
         // 1. Получаем верхнюю фигуру на начальной клетке
         var movingPiece = GetTopPiece(move.From);
@@ -262,18 +263,45 @@ public class ChessBoard : IBoard
         }
         else if (move.PromotionType.HasValue)
         {
-            // Превращение пешки: удаляем пешку с from, ставим новую фигуру на to
+            // Превращение: удаляем пешку, ставим новую фигуру
             PopPiece(move.From);
             PushPiece(move.To, new Piece(move.PromotionType.Value, currentColor));
         }
         else
         {
-            // Обычный ход: перемещаем верхнюю фигуру
-            var piece = PopPiece(move.From);
-            if (piece != null)
+            // Обычный ход: либо вся башня, либо часть
+            LinkedList<Piece>? movingStack;
+            if (splitCount.HasValue && splitCount.Value > 0)
             {
-                // Если на целевой клетке уже есть стек, то PushPiece добавит сверху
-                PushPiece(move.To, piece);
+                // Разделяем башню
+                var stack = GetStack(move.From);
+                if (stack == null || splitCount.Value >= stack.Count)
+                {
+                    // Если splitCount >= размеру стека, перемещаем всю башню (как обычный ход)
+                    movingStack = stack;
+                    SetStack(move.From, null);
+                }
+                else
+                {
+                    // Разделяем: верхние splitCount фигур уходят, нижние остаются
+                    var (upper, lower) = SplitStack(stack, splitCount.Value);
+                    movingStack = upper;
+                    SetStack(move.From, lower);
+                }
+            }
+            else
+            {
+                // Вся башня
+                movingStack = GetStack(move.From);
+                SetStack(move.From, null);
+            }
+
+            if (movingStack != null && movingStack.Count > 0)
+            {
+                // Добавляем перемещаемую часть на целевую клетку (слияние)
+                var targetStack = GetStack(move.To);
+                var newStack = ConcatStacks(targetStack, movingStack);
+                SetStack(move.To, newStack);
             }
         }
 
@@ -316,7 +344,7 @@ public interface IBoard
     void PushPiece(Position pos, Piece piece);
     Piece? PopPiece(Position pos);
     void SetPiece(Position pos, Piece? piece); // оставляем для удобства тестов
-    bool MakeMove(Move move);
+    bool MakeMove(Move move, int? splitCount = null);
     void UpdateCastlingRights(Move move);
     bool WhiteCanCastleKingSide { get; }
     bool WhiteCanCastleQueenSide { get; }

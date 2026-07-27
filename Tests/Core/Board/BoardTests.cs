@@ -103,4 +103,32 @@ public class BoardTests
         bool result = board.MakeMove(move);
         Assert.False(result);
     }
+
+    [Fact]
+    public void SplitStack_MovesOnlyTopPart()
+    {
+        var board = new ChessBoard();
+        var stack = new LinkedList<Piece>();
+        stack.AddFirst(new Piece(PieceType.Ratnik, PieceColor.White));
+        stack.AddFirst(new Piece(PieceType.Horseman, PieceColor.White)); // верх
+        stack.AddFirst(new Piece(PieceType.Archer, PieceColor.White));   // верхняя часть
+        board.SetStack(new Position(0, 0), stack);
+
+        // Ходим верхней частью (2 фигуры) на (0,1)
+        var move = new Move(new Position(0, 0), new Position(0, 1));
+        var result = board.MakeMove(move, 2);
+        Assert.True(result);
+
+        // Проверяем, что на (0,0) осталась 1 фигура (Ratnik)
+        var remaining = board.GetStack(new Position(0, 0));
+        Assert.NotNull(remaining);
+        Assert.Single(remaining);
+        Assert.Equal(PieceType.Ratnik, remaining.First.Value.Type);
+
+        // Проверяем, что на (0,1) теперь 2 фигуры (Archer + Horseman)
+        var moved = board.GetStack(new Position(0, 1));
+        Assert.NotNull(moved);
+        Assert.Equal(2, moved.Count);
+        Assert.Equal(PieceType.Archer, moved.First.Value.Type); // верхняя
+    }
 }
