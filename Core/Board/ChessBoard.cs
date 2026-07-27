@@ -11,9 +11,6 @@ public class ChessBoard : IBoard
 {
     public const int Size = 8;
 
-    // Старое хранилище (для обратной совместимости)
-    private readonly Piece?[,] _squares;
-
     // Новое хранилище для башен (стеки)
     private readonly LinkedList<Piece>?[,] _stacks;
 
@@ -40,7 +37,6 @@ public class ChessBoard : IBoard
         bool blackCanCastleKingSide = true,
         bool blackCanCastleQueenSide = true)
     {
-        _squares = new Piece?[Size, Size];
         _stacks = new LinkedList<Piece>?[Size, Size];
 
         WhiteCanCastleKingSide = whiteCanCastleKingSide;
@@ -55,7 +51,6 @@ public class ChessBoard : IBoard
                 for (int col = 0; col < Size; col++)
                 {
                     var piece = initialPosition[row, col];
-                    _squares[row, col] = piece;
                     if (piece != null)
                     {
                         var stack = new LinkedList<Piece>();
@@ -72,12 +67,6 @@ public class ChessBoard : IBoard
     }
 
     // --- Старые методы (остаются без изменений) ---
-    /// <summary>
-    /// Возвращает фигуру по позиции (прямой доступ с проверкой IsValid).
-    /// </summary>
-    public Piece? GetPiece(int row, int col) => GetPiece(new Position(row, col));
-    public Piece? GetPiece(Position pos) => pos.IsValid ? _squares[pos.Row, pos.Col] : null;
-
 
     /// <summary>
     /// Устанавливает фигуру в заданную клетку (можно null для очистки).
@@ -91,7 +80,6 @@ public class ChessBoard : IBoard
     {
         if (!pos.IsValid)
             throw new ArgumentException($"Некорректная позиция: {pos}", nameof(pos));
-        _squares[pos.Row, pos.Col] = piece;
         // Также обновляем стек: если piece != null, создаём стек с одной фигурой, иначе null
         if (piece != null)
         {
@@ -145,8 +133,6 @@ public class ChessBoard : IBoard
     {
         if (!pos.IsValid) return;
         _stacks[pos.Row, pos.Col] = stack;
-        // Синхронизируем _squares: верхняя фигура или null
-        _squares[pos.Row, pos.Col] = stack?.First?.Value;
     }
 
     /// <summary>Добавляет фигуру сверху стека (слияние).</summary>
@@ -160,8 +146,6 @@ public class ChessBoard : IBoard
             _stacks[pos.Row, pos.Col] = stack;
         }
         stack.AddFirst(piece);
-        // Обновляем верхнюю фигуру в _squares
-        _squares[pos.Row, pos.Col] = piece;
     }
 
     /// <summary>Удаляет верхнюю фигуру стека и возвращает её (или null).</summary>
@@ -175,12 +159,6 @@ public class ChessBoard : IBoard
         if (stack.Count == 0)
         {
             _stacks[pos.Row, pos.Col] = null;
-            _squares[pos.Row, pos.Col] = null;
-        }
-        else
-        {
-            // Обновляем верхнюю фигуру
-            _squares[pos.Row, pos.Col] = stack.First.Value;
         }
         return piece;
     }
@@ -333,7 +311,15 @@ public class ChessBoard : IBoard
 public interface IBoard
 {
     Piece? GetTopPiece(Position pos);
-    void SetPiece(Position pos, Piece? piece);
+    LinkedList<Piece>? GetStack(Position pos);
+    void SetStack(Position pos, LinkedList<Piece>? stack);
+    void PushPiece(Position pos, Piece piece);
+    Piece? PopPiece(Position pos);
+    void SetPiece(Position pos, Piece? piece); // оставляем для удобства тестов
     bool MakeMove(Move move);
-    // Позже могут добавиться методы для работы со стеками
+    void UpdateCastlingRights(Move move);
+    bool WhiteCanCastleKingSide { get; }
+    bool WhiteCanCastleQueenSide { get; }
+    bool BlackCanCastleKingSide { get; }
+    bool BlackCanCastleQueenSide { get; }
 }
