@@ -104,14 +104,18 @@ public class BoardTests
         Assert.False(result);
     }
 
+    /// <summary>
+    /// Проверяет, что метод MakeMove с параметром splitCount перемещает только верхнюю часть башни,
+    /// оставляя нижнюю часть на исходной клетке.
+    /// </summary>
     [Fact]
     public void SplitStack_MovesOnlyTopPart()
     {
         var board = new ChessBoard();
         var stack = new LinkedList<Piece>();
         stack.AddFirst(new Piece(PieceType.Ratnik, PieceColor.White));
-        stack.AddFirst(new Piece(PieceType.Horseman, PieceColor.White)); // верх
-        stack.AddFirst(new Piece(PieceType.Archer, PieceColor.White));   // верхняя часть
+        stack.AddFirst(new Piece(PieceType.Horseman, PieceColor.White));
+        stack.AddFirst(new Piece(PieceType.Archer, PieceColor.White));
         board.SetStack(new Position(0, 0), stack);
 
         // Ходим верхней частью (2 фигуры) на (0,1)
@@ -123,12 +127,12 @@ public class BoardTests
         var remaining = board.GetStack(new Position(0, 0));
         Assert.NotNull(remaining);
         Assert.Single(remaining);
-        Assert.Equal(PieceType.Ratnik, remaining.First.Value.Type);
+        Assert.Equal(PieceType.Ratnik, remaining.First!.Value.Type);
 
         // Проверяем, что на (0,1) теперь 2 фигуры (Archer + Horseman)
         var moved = board.GetStack(new Position(0, 1));
         Assert.NotNull(moved);
         Assert.Equal(2, moved.Count);
-        Assert.Equal(PieceType.Archer, moved.First.Value.Type); // верхняя
+        Assert.Equal(PieceType.Archer, moved.First!.Value.Type);
     }
 }

@@ -27,9 +27,9 @@ public static class MoveValidator
         var currentColor = movingPiece.Color;
 
         // 2. Проверяем, что ход допустим по правилам движения (генератор ходов)
-        var possibleMoves = MoveGenerator.GetMovesForPiece(board, move.From);
-        if (!possibleMoves.Any(m => m.Equals(move)))
-            return false;
+        //var possibleMoves = MoveGenerator.GetMovesForPiece(board, move.From);
+        //if (!possibleMoves.Any(m => m.Equals(move)))
+        //    return false;
 
         // 3. Сохраняем состояние для отката
         var capturedPiece = board.GetTopPiece(move.To);
