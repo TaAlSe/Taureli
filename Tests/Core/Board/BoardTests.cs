@@ -45,7 +45,7 @@ public class BoardTests
     {
         var board = new ChessBoard();
         var piece = new Piece(PieceType.Helgi, PieceColor.White);
-        board.SetPiece(4, 4, piece);
+        board.SetPiece(new Position(4, 4), piece);
 
         Assert.Same(piece, board.GetTopPiece(new Position(4, 4)));
     }
@@ -74,7 +74,6 @@ public class BoardTests
     public void SetPiece_InvalidPosition_ThrowsArgumentException()
     {
         var board = new ChessBoard();
-        Assert.Throws<ArgumentException>(() => board.SetPiece(8, 4, new Piece(PieceType.Ratnik, PieceColor.White)));
         Assert.Throws<ArgumentException>(() => board.SetPiece(new Position(8, 4), new Piece(PieceType.Ratnik, PieceColor.White)));
     }
 
@@ -137,5 +136,63 @@ public class BoardTests
         Assert.NotNull(moved);
         Assert.Equal(2, moved.Count);
         Assert.Equal(PieceType.Archer, moved.First!.Value.Type);
+    }
+
+    [Fact]
+    public void PushPiece_AddsToStack()
+    {
+        var board = new ChessBoard();
+        var pos = new Position(0, 0);
+        var piece = new Piece(PieceType.Ratnik, PieceColor.White);
+        board.PushPiece(pos, piece);
+        Assert.Equal(piece, board.GetTopPiece(pos));
+        Assert.Single(board.GetStack(pos));
+    }
+
+    [Fact]
+    public void PopPiece_RemovesTop()
+    {
+        var board = new ChessBoard();
+        var pos = new Position(0, 0);
+        board.PushPiece(pos, new Piece(PieceType.Ratnik, PieceColor.White));
+        board.PushPiece(pos, new Piece(PieceType.Horseman, PieceColor.White));
+        var popped = board.PopPiece(pos);
+        Assert.Equal(PieceType.Horseman, popped?.Type);
+        Assert.Equal(PieceType.Ratnik, board.GetTopPiece(pos)?.Type);
+    }
+
+    [Fact]
+    public void SetStack_ReplacesStack()
+    {
+        var board = new ChessBoard();
+        var pos = new Position(0, 0);
+        var stack = new List<Piece> { new(PieceType.Archer, PieceColor.White) };
+        board.SetStack(pos, stack);
+        Assert.Equal(stack, board.GetStack(pos));
+        Assert.Equal(PieceType.Archer, board.GetTopPiece(pos)?.Type);
+    }
+
+    [Fact]
+    public void ConcatStacks_CombinesTwoStacks()
+    {
+        var bottom = new List<Piece> { new(PieceType.Ratnik, PieceColor.White) };
+        var top = new List<Piece> { new(PieceType.Horseman, PieceColor.White), new(PieceType.Archer, PieceColor.White) };
+        var result = ChessBoard.ConcatStacks(bottom, top);
+        Assert.Equal(3, result.Count);
+        Assert.Equal(PieceType.Ratnik, result[0].Type);
+        Assert.Equal(PieceType.Horseman, result[1].Type);
+        Assert.Equal(PieceType.Archer, result[2].Type);
+    }
+
+    [Fact]
+    public void SplitStack_SplitsCorrectly()
+    {
+        var stack = new List<Piece> { new(PieceType.Ratnik, PieceColor.White), new(PieceType.Horseman, PieceColor.White), new(PieceType.Archer, PieceColor.White) };
+        var (upper, lower) = ChessBoard.SplitStack(stack, 2);
+        Assert.Equal(2, upper.Count);
+        Assert.Equal(1, lower.Count);
+        Assert.Equal(PieceType.Ratnik, upper[0].Type);
+        Assert.Equal(PieceType.Horseman, upper[1].Type);
+        Assert.Equal(PieceType.Archer, lower[0].Type);
     }
 }

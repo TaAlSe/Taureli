@@ -12,7 +12,7 @@ public class ChessBoard : IBoard
     public const int Size = 8;
 
     // Новое хранилище для башен (стеки)
-    private readonly LinkedList<Piece>?[,] _stacks;
+    private readonly List<Piece>?[,] _stacks;
 
     // Права на рокировку
     /// <summary>Может ли белый сделать короткую рокировку (с королевской стороны).</summary>
@@ -37,7 +37,7 @@ public class ChessBoard : IBoard
         bool blackCanCastleKingSide = true,
         bool blackCanCastleQueenSide = true)
     {
-        _stacks = new LinkedList<Piece>?[Size, Size];
+        _stacks = new List<Piece>?[Size, Size];
 
         WhiteCanCastleKingSide = whiteCanCastleKingSide;
         WhiteCanCastleQueenSide = whiteCanCastleQueenSide;
@@ -51,85 +51,31 @@ public class ChessBoard : IBoard
                 for (int col = 0; col < Size; col++)
                 {
                     var piece = initialPosition[row, col];
-                    if (piece != null)
-                    {
-                        var stack = new LinkedList<Piece>();
-                        stack.AddFirst(piece);
-                        _stacks[row, col] = stack;
-                    }
-                    else
-                    {
-                        _stacks[row, col] = null;
-                    }
+                    _stacks[row, col] = piece != null ? [piece] : null;
                 }
             }
         }
     }
 
-    // --- Старые методы (остаются без изменений) ---
-
-    /// <summary>
-    /// Устанавливает фигуру в заданную клетку (можно null для очистки).
-    /// </summary>
-    public void SetPiece(int row, int col, Piece? piece) => SetPiece(new Position(row, col), piece);
-
-    /// <summary>
-    /// Устанавливает фигуру в заданную клетку (можно null для очистки).
-    /// </summary>
-    public void SetPiece(Position pos, Piece? piece)
-    {
-        if (!pos.IsValid)
-            throw new ArgumentException($"Некорректная позиция: {pos}", nameof(pos));
-        // Также обновляем стек: если piece != null, создаём стек с одной фигурой, иначе null
-        if (piece != null)
-        {
-            var stack = new LinkedList<Piece>();
-            stack.AddFirst(piece);
-            _stacks[pos.Row, pos.Col] = stack;
-        }
-        else
-        {
-            _stacks[pos.Row, pos.Col] = null;
-        }
-    }
-
-    public override string ToString()
-    {
-        // Пока используем старые методы для отображения
-        var sb = new System.Text.StringBuilder();
-        for (int row = Size - 1; row >= 0; row--)
-        {
-            sb.Append(row + 1).Append("  ");
-            for (int col = 0; col < Size; col++)
-            {
-                var piece = GetTopPiece(new Position(row, col));
-                sb.Append(piece == null ? ".  " : piece.GetDebugCode() + " ");
-            }
-            sb.AppendLine();
-        }
-        sb.AppendLine("   a  b  c  d  e  f  g  h");
-        return sb.ToString();
-    }
-
-    // --- Новые методы для работы со стеками ---
+    // --- Стек-методы ---
 
     /// <summary>Возвращает верхнюю фигуру стека на позиции (или null).</summary>
     public Piece? GetTopPiece(Position pos)
     {
         if (!pos.IsValid) return null;
         var stack = _stacks[pos.Row, pos.Col];
-        return stack?.First?.Value;
+        return stack?.LastOrDefault();
     }
 
     /// <summary>Возвращает весь стек на позиции (или null).</summary>
-    public LinkedList<Piece>? GetStack(Position pos)
+    public List<Piece>? GetStack(Position pos)
     {
         if (!pos.IsValid) return null;
         return _stacks[pos.Row, pos.Col];
     }
 
     /// <summary>Заменяет стек на позиции новым (может быть null).</summary>
-    public void SetStack(Position pos, LinkedList<Piece>? stack)
+    public void SetStack(Position pos, List<Piece>? stack)
     {
         if (!pos.IsValid) return;
         _stacks[pos.Row, pos.Col] = stack;
@@ -142,10 +88,10 @@ public class ChessBoard : IBoard
         var stack = _stacks[pos.Row, pos.Col];
         if (stack == null)
         {
-            stack = new LinkedList<Piece>();
+            stack = [];
             _stacks[pos.Row, pos.Col] = stack;
         }
-        stack.AddFirst(piece);
+        stack.Add(piece);
     }
 
     /// <summary>Удаляет верхнюю фигуру стека и возвращает её (или null).</summary>
@@ -153,49 +99,65 @@ public class ChessBoard : IBoard
     {
         if (!pos.IsValid) return null;
         var stack = _stacks[pos.Row, pos.Col];
-        if (stack == null || stack.First == null) return null;
-        var piece = stack.First.Value;
-        stack.RemoveFirst();
+        if (stack == null || stack.Count == 0) return null;
+        var piece = stack[^1];
+        stack.RemoveAt(stack.Count - 1);
         if (stack.Count == 0)
-        {
             _stacks[pos.Row, pos.Col] = null;
-        }
         return piece;
     }
 
+    /// <summary>
+    /// Устанавливает фигуру в заданную клетку (можно null для очистки).
+    /// </summary>
+    public void SetPiece(Position pos, Piece? piece)
+    {
+        if (!pos.IsValid)
+            throw new ArgumentException($"Некорректная позиция: {pos}", nameof(pos));
+        _stacks[pos.Row, pos.Col] = piece != null ? [piece] : null;
+    }
+
+    // --- Вспомогательные методы для башен ---
+
     /// <summary>Соединяет две башни (top ставится поверх bottom).</summary>
-    public static LinkedList<Piece>? ConcatStacks(LinkedList<Piece>? bottom, LinkedList<Piece>? top)
+    public static List<Piece>? ConcatStacks(List<Piece>? bottom, List<Piece>? top)
     {
         if (top == null) return bottom;
         if (bottom == null) return top;
-        // Копируем элементы top в bottom (это O(n), но для MVP приемлемо)
-        foreach (var piece in top)
-            bottom.AddLast(piece);
+        bottom.AddRange(top);
         return bottom;
     }
 
     /// <summary>Разделяет башню на две части: верхние count фигур и нижние.</summary>
-    public static (LinkedList<Piece>? upper, LinkedList<Piece>? lower) SplitStack(LinkedList<Piece> stack, int count)
+    public static (List<Piece>? upper, List<Piece>? lower) SplitStack(List<Piece> stack, int count)
     {
         if (stack == null || count <= 0 || count >= stack.Count)
             return (null, stack);
-        var upper = new LinkedList<Piece>();
-        var lower = new LinkedList<Piece>();
-        int i = 0;
-        foreach (var piece in stack)
-        {
-            if (i < count)
-                upper.AddLast(piece);
-            else
-                lower.AddLast(piece);
-            i++;
-        }
+        var upper = stack.Take(count).ToList();
+        var lower = stack.Skip(count).ToList();
         return (upper, lower);
     }
 
-    // --- Остальные методы (UpdateCastlingRights, MakeMove, ExecuteCastling) ---
-    // Они пока используют старые методы, но в микрошаге 3 мы их перепишем.
-    // Пока оставляем их без изменений.
+    // --- Остальные методы ---
+
+    public override string ToString()
+    {
+        // Пока используем старые методы для отображения
+        var sb = new System.Text.StringBuilder();
+        for (int row = Size - 1; row >= 0; row--)
+        {
+            sb.Append(row + 1).Append("  ");
+            for (int col = 0; col < Size; col++)
+            {
+                var pos = new Position(row, col);
+                var piece = GetTopPiece(pos);
+                sb.Append(piece == null ? ".  " : piece.GetDebugCode() + " ");
+            }
+            sb.AppendLine();
+        }
+        sb.AppendLine("   a  b  c  d  e  f  g  h");
+        return sb.ToString();
+    }
 
     /// <summary>
     /// Обновляет права на рокировку в зависимости от того, на какой клетке находится ладья.
@@ -270,7 +232,7 @@ public class ChessBoard : IBoard
         else
         {
             // Обычный ход: либо вся башня, либо часть
-            LinkedList<Piece>? movingStack;
+            List<Piece>? movingStack;
             if (splitCount.HasValue && splitCount.Value > 0)
             {
                 // Разделяем башню
@@ -339,8 +301,8 @@ public class ChessBoard : IBoard
 public interface IBoard
 {
     Piece? GetTopPiece(Position pos);
-    LinkedList<Piece>? GetStack(Position pos);
-    void SetStack(Position pos, LinkedList<Piece>? stack);
+    List<Piece>? GetStack(Position pos);
+    void SetStack(Position pos, List<Piece>? stack);
     void PushPiece(Position pos, Piece piece);
     Piece? PopPiece(Position pos);
     void SetPiece(Position pos, Piece? piece); // оставляем для удобства тестов
