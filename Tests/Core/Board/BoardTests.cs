@@ -111,13 +111,15 @@ public class BoardTests
     public void SplitStack_MovesOnlyTopPart()
     {
         var board = new ChessBoard();
-        // Добавляем короля, чтобы валидатор не запрещал ход
+        // Добавляем короля для валидации
         board.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
 
-        var stack = new LinkedList<Piece>();
-        stack.AddFirst(new Piece(PieceType.Ratnik, PieceColor.White));
-        stack.AddFirst(new Piece(PieceType.Horseman, PieceColor.White));
-        stack.AddFirst(new Piece(PieceType.Archer, PieceColor.White));
+        var stack = new List<Piece>
+        {
+            new(PieceType.Ratnik, PieceColor.White),
+            new(PieceType.Horseman, PieceColor.White),
+            new(PieceType.Archer, PieceColor.White)
+        };
         board.SetStack(new Position(0, 0), stack);
 
         // Ходим верхней частью (2 фигуры) на (0,1)
@@ -129,15 +131,18 @@ public class BoardTests
         var remaining = board.GetStack(new Position(0, 0));
         Assert.NotNull(remaining);
         Assert.Single(remaining);
-        Assert.Equal(PieceType.Ratnik, remaining.First!.Value.Type);
+        Assert.Equal(PieceType.Ratnik, remaining[0].Type);
 
         // Проверяем, что на (0,1) теперь 2 фигуры (Archer + Horseman)
         var moved = board.GetStack(new Position(0, 1));
         Assert.NotNull(moved);
         Assert.Equal(2, moved.Count);
-        Assert.Equal(PieceType.Archer, moved.First!.Value.Type);
+        Assert.Equal(PieceType.Archer, moved[^1].Type); // верхняя фигура — Archer
     }
 
+    /// <summary>
+    /// Проверяет, что PushPiece добавляет фигуру в стек на указанной позиции.
+    /// </summary>
     [Fact]
     public void PushPiece_AddsToStack()
     {
@@ -146,9 +151,14 @@ public class BoardTests
         var piece = new Piece(PieceType.Ratnik, PieceColor.White);
         board.PushPiece(pos, piece);
         Assert.Equal(piece, board.GetTopPiece(pos));
-        Assert.Single(board.GetStack(pos));
+        var stack = board.GetStack(pos);
+        Assert.NotNull(stack);
+        Assert.Single(stack);
     }
 
+    /// <summary>
+    /// Проверяет, что PopPiece удаляет и возвращает верхнюю фигуру стека.
+    /// </summary>
     [Fact]
     public void PopPiece_RemovesTop()
     {
@@ -161,6 +171,9 @@ public class BoardTests
         Assert.Equal(PieceType.Ratnik, board.GetTopPiece(pos)?.Type);
     }
 
+    /// <summary>
+    /// Проверяет, что SetStack заменяет стек на позиции новым списком.
+    /// </summary>
     [Fact]
     public void SetStack_ReplacesStack()
     {
@@ -172,25 +185,39 @@ public class BoardTests
         Assert.Equal(PieceType.Archer, board.GetTopPiece(pos)?.Type);
     }
 
+    /// <summary>
+    /// Проверяет, что ConcatStacks объединяет две башни (верхняя ставится поверх нижней).
+    /// </summary>
     [Fact]
     public void ConcatStacks_CombinesTwoStacks()
     {
         var bottom = new List<Piece> { new(PieceType.Ratnik, PieceColor.White) };
         var top = new List<Piece> { new(PieceType.Horseman, PieceColor.White), new(PieceType.Archer, PieceColor.White) };
         var result = ChessBoard.ConcatStacks(bottom, top);
+        Assert.NotNull(result);
         Assert.Equal(3, result.Count);
         Assert.Equal(PieceType.Ratnik, result[0].Type);
         Assert.Equal(PieceType.Horseman, result[1].Type);
         Assert.Equal(PieceType.Archer, result[2].Type);
     }
 
+    /// <summary>
+    /// Проверяет, что SplitStack разделяет башню на верхнюю и нижнюю части заданного размера.
+    /// </summary>
     [Fact]
     public void SplitStack_SplitsCorrectly()
     {
-        var stack = new List<Piece> { new(PieceType.Ratnik, PieceColor.White), new(PieceType.Horseman, PieceColor.White), new(PieceType.Archer, PieceColor.White) };
+        var stack = new List<Piece>
+    {
+        new(PieceType.Ratnik, PieceColor.White),
+        new(PieceType.Horseman, PieceColor.White),
+        new(PieceType.Archer, PieceColor.White)
+    };
         var (upper, lower) = ChessBoard.SplitStack(stack, 2);
+        Assert.NotNull(upper);
+        Assert.NotNull(lower);
         Assert.Equal(2, upper.Count);
-        Assert.Equal(1, lower.Count);
+        Assert.Single(lower);
         Assert.Equal(PieceType.Ratnik, upper[0].Type);
         Assert.Equal(PieceType.Horseman, upper[1].Type);
         Assert.Equal(PieceType.Archer, lower[0].Type);
