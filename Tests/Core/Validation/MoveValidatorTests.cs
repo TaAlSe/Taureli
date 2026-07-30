@@ -54,7 +54,7 @@ public class MoveValidatorTests
     /// <summary>
     /// Проверяет, что нелегальный ход (пешка горизонтально) не проходит валидацию.
     /// </summary>
-    [Fact(Skip = "Временно пропущен, пока не адаптированы генераторы для башен")]
+    [Fact]
     public void IllegalPawnMove_Horizontal_IsNotLegal()
     {
         var board = new ChessBoard(PieceFactory.StartingPosition());

@@ -38,11 +38,11 @@ public static class CastlingMoveGenerator
 
         // Короткая рокировка
         if (canCastleKingSide && CanCastle(board, row, kingPos, true))
-            moves.Add(CreateCastlingMove(kingPos, row, 6, CastlingSide.KingSide));
+            moves.Add(Move.CreateCastlingMove(kingPos, row, 6, CastlingSide.KingSide));
 
         // Длинная рокировка
         if (canCastleQueenSide && CanCastle(board, row, kingPos, false))
-            moves.Add(CreateCastlingMove(kingPos, row, 2, CastlingSide.QueenSide));
+            moves.Add(Move.CreateCastlingMove(kingPos, row, 2, CastlingSide.QueenSide));
 
         return moves;
     }
@@ -90,22 +90,5 @@ public static class CastlingMoveGenerator
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// Создаёт объект Move, представляющий рокировку.
-    /// </summary>
-    /// <param name="from">Позиция короля до рокировки.</param>
-    /// <param name="row">Горизонталь короля (0 для белых, 7 для чёрных).</param>
-    /// <param name="col">Конечная позиция короля (6 для короткой, 2 для длинной).</param>
-    /// <param name="side">Сторона рокировки.</param>
-    /// <returns>Объект Move с установленными флагами IsCastling и CastlingSide.</returns>
-    private static Move CreateCastlingMove(Position from, int row, int col, CastlingSide side)
-    {
-        return new Move(from, new Position(row, col), null)
-        {
-            IsCastling = true,
-            CastlingSide = side
-        };
     }
 }

@@ -166,65 +166,15 @@ public class ChessBoard : IBoard
     }
 
     /// <summary>
-    /// Обновляет права на рокировку в зависимости от того, на какой клетке находится ладья.
-    /// Если позиция совпадает с начальной клеткой ладьи, соответствующее право сбрасывается.
+    /// 3. Выполняем ход в зависимости от типа
     /// </summary>
-    /// <param name="pos">Позиция, которую нужно проверить (начальная или конечная клетка хода).</param>
-    private void CheckRookPosition(Position pos)
+    /// <param name="move"></param>
+    /// <param name="splitCount"></param>
+    /// <exception cref="InvalidOperationException"></exception>
+    public void ExecuteMoveInternal(Move move, int? splitCount)
     {
-        (WhiteCanCastleQueenSide, WhiteCanCastleKingSide, BlackCanCastleQueenSide, BlackCanCastleKingSide) = pos switch
-        {
-            (0, 0) => (false, WhiteCanCastleKingSide, BlackCanCastleQueenSide, BlackCanCastleKingSide),
-            (0, 7) => (WhiteCanCastleQueenSide, false, BlackCanCastleQueenSide, BlackCanCastleKingSide),
-            (7, 0) => (WhiteCanCastleQueenSide, WhiteCanCastleKingSide, false, BlackCanCastleKingSide),
-            (7, 7) => (WhiteCanCastleQueenSide, WhiteCanCastleKingSide, BlackCanCastleQueenSide, false),
-            _ => (WhiteCanCastleQueenSide, WhiteCanCastleKingSide, BlackCanCastleQueenSide, BlackCanCastleKingSide)
-        };
-    }
+        var currentColor = GetTopPiece(move.From)?.Color ?? throw new InvalidOperationException("No piece at from");
 
-    /// <summary>
-    /// Обновляет права на рокировку после выполнения хода.
-    /// </summary>
-    public void UpdateCastlingRights(Move move)
-    {
-        // Король
-        if (move.From == new Position(0, 4))
-        {
-            WhiteCanCastleKingSide = false;
-            WhiteCanCastleQueenSide = false;
-        }
-        else if (move.From == new Position(7, 4))
-        {
-            BlackCanCastleKingSide = false;
-            BlackCanCastleQueenSide = false;
-        }
-
-        // Ладья на начальной клетке (двигалась)
-        CheckRookPosition(move.From);
-        // Ладья на конечной клетке (была взята)
-        CheckRookPosition(move.To);
-    }
-
-    /// <summary>
-    /// Выполняет ход на доске.
-    /// </summary>
-    /// <param name="move">Ход, который нужно выполнить.</param>
-    /// <param name="splitCount">Количество верхних фигур, которые нужно переместить (если null, перемещается вся башня).</param>
-    /// <returns>true, если ход выполнен успешно.</returns>
-    public bool MakeMove(Move move, int? splitCount = null)
-    {
-        // 1. Получаем верхнюю фигуру на начальной клетке
-        var movingPiece = GetTopPiece(move.From);
-        if (movingPiece == null)
-            return false;
-
-        // 2. Проверяем легальность (используем старый валидатор, который пока работает с GetPiece)
-        if (!MoveValidator.IsLegalMove(this, move))
-            return false;
-
-        var currentColor = movingPiece.Color;
-
-        // 3. Выполняем ход в зависимости от типа
         if (move.IsCastling)
         {
             ExecuteCastling(move, currentColor);
@@ -272,12 +222,61 @@ public class ChessBoard : IBoard
                 SetStack(move.To, newStack);
             }
         }
+    }
 
-        // 4. Обновляем права рокировки (они не зависят от стеков, работают с позициями)
+    /// <summary>
+    /// Обновляет права на рокировку в зависимости от того, на какой клетке находится ладья.
+    /// Если позиция совпадает с начальной клеткой ладьи, соответствующее право сбрасывается.
+    /// </summary>
+    /// <param name="pos">Позиция, которую нужно проверить (начальная или конечная клетка хода).</param>
+    private void CheckRookPosition(Position pos)
+    {
+        (WhiteCanCastleQueenSide, WhiteCanCastleKingSide, BlackCanCastleQueenSide, BlackCanCastleKingSide) = pos switch
+        {
+            (0, 0) => (false, WhiteCanCastleKingSide, BlackCanCastleQueenSide, BlackCanCastleKingSide),
+            (0, 7) => (WhiteCanCastleQueenSide, false, BlackCanCastleQueenSide, BlackCanCastleKingSide),
+            (7, 0) => (WhiteCanCastleQueenSide, WhiteCanCastleKingSide, false, BlackCanCastleKingSide),
+            (7, 7) => (WhiteCanCastleQueenSide, WhiteCanCastleKingSide, BlackCanCastleQueenSide, false),
+            _ => (WhiteCanCastleQueenSide, WhiteCanCastleKingSide, BlackCanCastleQueenSide, BlackCanCastleKingSide)
+        };
+    }
+
+    /// <summary>
+    /// Обновляет права на рокировку после выполнения хода.
+    /// </summary>
+    public void UpdateCastlingRights(Move move)
+    {
+        // Король
+        if (move.From == new Position(0, 4))
+        {
+            WhiteCanCastleKingSide = false;
+            WhiteCanCastleQueenSide = false;
+        }
+        else if (move.From == new Position(7, 4))
+        {
+            BlackCanCastleKingSide = false;
+            BlackCanCastleQueenSide = false;
+        }
+
+        // Ладья на начальной клетке (двигалась)
+        CheckRookPosition(move.From);
+        // Ладья на конечной клетке (была взята)
+        CheckRookPosition(move.To);
+    }
+
+    /// <summary>
+    /// Выполняет ход на доске.
+    /// </summary>
+    /// <param name="move">Ход, который нужно выполнить.</param>
+    /// <param name="splitCount">Количество верхних фигур, которые нужно переместить (если null, перемещается вся башня).</param>
+    /// <returns>true, если ход выполнен успешно.</returns>
+    public bool MakeMove(Move move, int? splitCount = null)
+    {
+        if (!MoveValidator.IsLegalMove(this, move))
+            return false;
+
+        ExecuteMoveInternal(move, splitCount ?? move.SplitCount);
         UpdateCastlingRights(move);
-
-        // todo: обновить состояние для взятия на проходе и превращения в хелги
-
         return true;
     }
 

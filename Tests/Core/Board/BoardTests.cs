@@ -95,7 +95,7 @@ public class BoardTests
     /// <summary>
     /// Проверяет, что метод MakeMove возвращает false для нелегального хода (пешка пытается пойти горизонтально).
     /// </summary>
-    [Fact(Skip = "Временно пропущен, пока не адаптированы генераторы для башен")]
+    [Fact]
     public void MakeMove_IllegalMove_ReturnsFalse()
     {
         var board = new ChessBoard(PieceFactory.StartingPosition());

@@ -19,40 +19,15 @@ public static class MoveValidator
     /// <returns>true, если ход легален.</returns>
     public static bool IsLegalMove(ChessBoard board, Move move)
     {
-        // 1. Проверяем, что фигура существует
-        var movingPiece = board.GetTopPiece(move.From);
-        if (movingPiece == null)
-            return false;
+        var fromStackCopy = board.GetStack(move.From)?.ToList();
+        var toStackCopy = board.GetStack(move.To)?.ToList();
 
-        var currentColor = movingPiece.Color;
+        // Выполняем ход через внутренний метод (без проверок)
+        board.ExecuteMoveInternal(move, move.SplitCount);
 
-        // Проверка генератора (пока закомментирована)
-        // var possibleMoves = MoveGenerator.GetMovesForPiece(board, move.From);
-        // if (!possibleMoves.Any(m => m.Equals(move)))
-        //     return false;
+        var movingPiece = board.GetTopPiece(move.From) ?? board.GetTopPiece(move.To);
+        var currentColor = movingPiece?.Color ?? throw new InvalidOperationException("No piece after move");
 
-        // Сохраняем копии стеков для отката
-        var fromStackCopy = board.GetStack(move.From)?.ToList(); // копия
-        var toStackCopy = board.GetStack(move.To)?.ToList();     // копия
-
-        PieceType? promotionType = move.PromotionType;
-
-        // Временно выполняем ход
-        if (promotionType.HasValue)
-        {
-            // Превращение: удаляем пешку, ставим новую фигуру
-            board.PopPiece(move.From);
-            board.PushPiece(move.To, new Piece(promotionType.Value, currentColor));
-        }
-        else
-        {
-            // Обычный ход (без разделения): перемещаем верхнюю фигуру
-            var piece = board.PopPiece(move.From);
-            if (piece != null)
-                board.PushPiece(move.To, piece);
-        }
-
-        // Проверка шаха
         var kingPos = FindKing(board, currentColor);
         bool isLegal = false;
         if (kingPos.HasValue)
@@ -61,7 +36,7 @@ public static class MoveValidator
             isLegal = !AttackDetector.IsSquareAttacked(board, kingPos.Value, opponentColor);
         }
 
-        // Откат: восстанавливаем из копий
+        // Откат
         board.SetStack(move.From, fromStackCopy);
         board.SetStack(move.To, toStackCopy);
 

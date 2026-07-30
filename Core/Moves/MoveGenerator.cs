@@ -62,6 +62,29 @@ public static class MoveGenerator
             return [.. positions.Select(pos => new Move(from, pos))];
         }
 
-        return [];
+        // Если на клетке башня (больше 1 фигуры), добавляем ходы с разделением
+        var stack = board.GetStack(from);
+        if (stack != null && stack.Count > 1)
+        {
+            var additionalMoves = new List<Move>();
+            foreach (var move in moves)
+            {
+                // Для каждого хода добавляем варианты с разделением (от 1 до stack.Count-1)
+                for (int k = 1; k < stack.Count; k++)
+                {
+                    // Создаём копию хода с SplitCount = k
+                    var splitMove = new Move(move.From, move.To, move.PromotionType)
+                    {
+                        IsCastling = move.IsCastling,
+                        CastlingSide = move.CastlingSide,
+                        SplitCount = k
+                    };
+                    additionalMoves.Add(splitMove);
+                }
+            }
+            moves.AddRange(additionalMoves);
+        }
+
+        return moves;
     }
 }
