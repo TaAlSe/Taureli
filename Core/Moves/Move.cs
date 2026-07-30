@@ -24,17 +24,12 @@ public class Move(Position from, Position to, PieceType? promotionType = null)
     /// Создаёт объект Move, представляющий рокировку.
     /// </summary>
     /// <param name="from">Позиция короля до рокировки.</param>
-    /// <param name="row">Горизонталь короля (0 для белых, 7 для чёрных).</param>
-    /// <param name="col">Конечная позиция короля (6 для короткой, 2 для длинной).</param>
+    /// <param name="to">Позиция короля после рокировки</param>
     /// <param name="side">Сторона рокировки.</param>
     /// <returns>Объект Move с установленными флагами IsCastling и CastlingSide.</returns>
-    public static Move CreateCastlingMove(Position from, int row, int col, CastlingSide side)
+    public static Move CreateCastling(Position from, Position to, CastlingSide side)
     {
-        return new Move(from, new Position(row, col), null)
-        {
-            IsCastling = true,
-            CastlingSide = side
-        };
+        return new Move(from, to, null) { IsCastling = true, CastlingSide = side };
     }
 
     public override bool Equals(object? obj)

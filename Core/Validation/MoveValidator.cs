@@ -19,15 +19,24 @@ public static class MoveValidator
     /// <returns>true, если ход легален.</returns>
     public static bool IsLegalMove(ChessBoard board, Move move)
     {
+        // Сохраняем копии стеков для отката
         var fromStackCopy = board.GetStack(move.From)?.ToList();
         var toStackCopy = board.GetStack(move.To)?.ToList();
 
-        // Выполняем ход через внутренний метод (без проверок)
+        // Выполняем ход через внутренний метод
         board.ExecuteMoveInternal(move, move.SplitCount);
 
+        // Находим цвет фигуры, которая ходила (она должна быть на доске)
         var movingPiece = board.GetTopPiece(move.From) ?? board.GetTopPiece(move.To);
-        var currentColor = movingPiece?.Color ?? throw new InvalidOperationException("No piece after move");
+        if (movingPiece == null)
+        {
+            // Если фигура исчезла (например, превращение), то ход нелегален
+            board.SetStack(move.From, fromStackCopy);
+            board.SetStack(move.To, toStackCopy);
+            return false;
+        }
 
+        var currentColor = movingPiece.Color;
         var kingPos = FindKing(board, currentColor);
         bool isLegal = false;
         if (kingPos.HasValue)

@@ -20,59 +20,68 @@ public static class MoveGenerator
     /// </summary>
     /// <param name="board">Текущая доска.</param>
     /// <param name="from">Позиция фигуры.</param>
-    /// <returns>Список доступных позиций для хода.</returns>
+    /// <returns>Список доступных ходов.</returns>
     public static List<Move> GetMovesForPiece(ChessBoard board, Position from)
     {
         var piece = board.GetTopPiece(from);
         if (piece == null) return [];
 
-        // Специальные фигуры (нелинейные)
-        if (piece.Type == PieceType.Horseman)
+        var moves = new List<Move>();
+
+        // Генерация ходов в зависимости от типа фигуры
+        switch (piece.Type)
         {
-            var positions = LinearMoveGenerator.GetMoves(board, from, Directions.KnightDirections, 1);
-            return [.. positions.Select(pos => new Move(from, pos))];
+            case PieceType.Horseman:
+                {
+                    var positions = LinearMoveGenerator.GetMoves(board, from, Directions.KnightDirections, 1);
+                    moves.AddRange(positions.Select(pos => new Move(from, pos)));
+                    break;
+                }
+            case PieceType.Helgi:
+                {
+                    var queenPositions = LinearMoveGenerator.GetMoves(board, from, Directions.QueenDirections);
+                    var knightPositions = LinearMoveGenerator.GetMoves(board, from, Directions.KnightDirections, 1);
+                    var allPositions = queenPositions.Concat(knightPositions).ToList();
+                    moves.AddRange(allPositions.Select(pos => new Move(from, pos)));
+                    break;
+                }
+            case PieceType.Ratnik:
+                {
+                    moves.AddRange(PawnMoveGenerator.GetMoves(board, from));
+                    break;
+                }
+            case PieceType.Volkhv:
+                {
+                    var positions = LinearMoveGenerator.GetMoves(board, from, Directions.QueenDirections, 1);
+                    moves.AddRange(positions.Select(pos => new Move(from, pos)));
+                    moves.AddRange(CastlingMoveGenerator.GetCastlingMoves(board, piece.Color));
+                    break;
+                }
+            default:
+                {
+                    // Линейные фигуры (ладья, слон, князь)
+                    if (_directionsMap.TryGetValue(piece.Type, out var directions))
+                    {
+                        var positions = LinearMoveGenerator.GetMoves(board, from, directions);
+                        moves.AddRange(positions.Select(pos => new Move(from, pos)));
+                    }
+                    break;
+                }
         }
 
-        if (piece.Type == PieceType.Helgi)
-        {
-            var queenPositions = LinearMoveGenerator.GetMoves(board, from, Directions.QueenDirections);
-            var knightPositions = LinearMoveGenerator.GetMoves(board, from, Directions.KnightDirections, 1);
-            var allPositions = queenPositions.Concat(knightPositions).ToList();
-            return [.. allPositions.Select(pos => new Move(from, pos))];
-        }
-
-        if (piece.Type == PieceType.Ratnik)
-        {
-            // Пешка возвращает Move, а не Position
-            return PawnMoveGenerator.GetMoves(board, from);
-        }
-
-        if (piece.Type == PieceType.Volkhv)
-        {
-            var positions = LinearMoveGenerator.GetMoves(board, from, Directions.QueenDirections, 1);
-            var moves = positions.Select(pos => new Move(from, pos)).ToList();
-            moves.AddRange(CastlingMoveGenerator.GetCastlingMoves(board, piece.Color));
-            return moves;
-        }
-
-        // Линейные фигуры (ладья, слон, князь)
-        if (_directionsMap.TryGetValue(piece.Type, out var directions))
-        {
-            var positions = LinearMoveGenerator.GetMoves(board, from, directions);
-            return [.. positions.Select(pos => new Move(from, pos))];
-        }
-
-        // Если на клетке башня (больше 1 фигуры), добавляем ходы с разделением
+        // Добавляем ходы с разделением для башен (если на клетке больше одной фигуры)
         var stack = board.GetStack(from);
         if (stack != null && stack.Count > 1)
         {
             var additionalMoves = new List<Move>();
             foreach (var move in moves)
             {
-                // Для каждого хода добавляем варианты с разделением (от 1 до stack.Count-1)
+                // Пропускаем рокировку и превращение (они не могут быть разделены)
+                if (move.IsCastling || move.PromotionType.HasValue)
+                    continue;
+
                 for (int k = 1; k < stack.Count; k++)
                 {
-                    // Создаём копию хода с SplitCount = k
                     var splitMove = new Move(move.From, move.To, move.PromotionType)
                     {
                         IsCastling = move.IsCastling,

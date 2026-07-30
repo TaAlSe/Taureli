@@ -223,4 +223,31 @@ public class BoardTests
         Assert.Equal(PieceType.Archer, upper[1].Type);   // верхняя часть: Archer (верхняя)
         Assert.Equal(PieceType.Ratnik, lower[0].Type);   // нижняя часть: Ratnik
     }
+
+    /// <summary>
+    /// Проверяет, что рокировка выполняется корректно: король и ладья перемещаются на правильные клетки.
+    /// </summary>
+    [Fact]
+    public void MakeMove_Castling_WorksCorrectly()
+    {
+        var board = new ChessBoard();
+        // Ставим белого короля на e1 и ладью на h1
+        board.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
+        board.SetPiece(new Position(0, 7), new Piece(PieceType.Ratoborets, PieceColor.White));
+        // Очищаем клетки между ними (f1, g1) – они должны быть пустыми
+        board.SetPiece(new Position(0, 5), null);
+        board.SetPiece(new Position(0, 6), null);
+
+        var move = Move.CreateCastling(new Position(0, 4), new Position(0, 6), CastlingSide.KingSide);
+        var result = board.MakeMove(move);
+        Assert.True(result);
+
+        // Проверяем, что король на g1
+        Assert.Equal(PieceType.Volkhv, board.GetTopPiece(new Position(0, 6))?.Type);
+        // Проверяем, что ладья на f1
+        Assert.Equal(PieceType.Ratoborets, board.GetTopPiece(new Position(0, 5))?.Type);
+        // Проверяем, что e1 и h1 пусты
+        Assert.Null(board.GetTopPiece(new Position(0, 4)));
+        Assert.Null(board.GetTopPiece(new Position(0, 7)));
+    }
 }

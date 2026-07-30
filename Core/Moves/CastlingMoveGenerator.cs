@@ -38,11 +38,11 @@ public static class CastlingMoveGenerator
 
         // Короткая рокировка
         if (canCastleKingSide && CanCastle(board, row, kingPos, true))
-            moves.Add(Move.CreateCastlingMove(kingPos, row, 6, CastlingSide.KingSide));
+            moves.Add(Move.CreateCastling(kingPos, new Position(row, 6), CastlingSide.KingSide));
 
         // Длинная рокировка
         if (canCastleQueenSide && CanCastle(board, row, kingPos, false))
-            moves.Add(Move.CreateCastlingMove(kingPos, row, 2, CastlingSide.QueenSide));
+            moves.Add(Move.CreateCastling(kingPos, new Position(row, 2), CastlingSide.QueenSide));
 
         return moves;
     }
