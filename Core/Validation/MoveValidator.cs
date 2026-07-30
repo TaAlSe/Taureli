@@ -26,17 +26,18 @@ public static class MoveValidator
 
         var currentColor = movingPiece.Color;
 
-        // 2. Проверка генератора (пока закомментирована, адаптируем позже)
+        // Проверка генератора (пока закомментирована)
         // var possibleMoves = MoveGenerator.GetMovesForPiece(board, move.From);
         // if (!possibleMoves.Any(m => m.Equals(move)))
         //     return false;
 
-        // 3. Сохраняем стеки для отката (включая null)
-        var fromStack = board.GetStack(move.From);
-        var toStack = board.GetStack(move.To);
+        // Сохраняем копии стеков для отката
+        var fromStackCopy = board.GetStack(move.From)?.ToList(); // копия
+        var toStackCopy = board.GetStack(move.To)?.ToList();     // копия
+
         PieceType? promotionType = move.PromotionType;
 
-        // 4. Временно выполняем ход
+        // Временно выполняем ход
         if (promotionType.HasValue)
         {
             // Превращение: удаляем пешку, ставим новую фигуру
@@ -51,7 +52,7 @@ public static class MoveValidator
                 board.PushPiece(move.To, piece);
         }
 
-        // 5. Проверяем, не остался ли король под шахом
+        // Проверка шаха
         var kingPos = FindKing(board, currentColor);
         bool isLegal = false;
         if (kingPos.HasValue)
@@ -60,9 +61,9 @@ public static class MoveValidator
             isLegal = !AttackDetector.IsSquareAttacked(board, kingPos.Value, opponentColor);
         }
 
-        // 6. Откатываем ход (восстанавливаем стеки)
-        board.SetStack(move.From, fromStack);
-        board.SetStack(move.To, toStack);
+        // Откат: восстанавливаем из копий
+        board.SetStack(move.From, fromStackCopy);
+        board.SetStack(move.To, toStackCopy);
 
         return isLegal;
     }

@@ -203,24 +203,24 @@ public class BoardTests
     }
 
     /// <summary>
-    /// Проверяет, что SplitStack разделяет башню на верхнюю и нижнюю части заданного размера.
+    /// Проверяет, что SplitStack правильно разделяет башню на верхнюю и нижнюю части.
     /// </summary>
     [Fact]
     public void SplitStack_SplitsCorrectly()
     {
         var stack = new List<Piece>
     {
-        new(PieceType.Ratnik, PieceColor.White),
-        new(PieceType.Horseman, PieceColor.White),
-        new(PieceType.Archer, PieceColor.White)
+        new(PieceType.Ratnik, PieceColor.White),   // нижняя
+        new(PieceType.Horseman, PieceColor.White), // средняя
+        new(PieceType.Archer, PieceColor.White)    // верхняя
     };
         var (upper, lower) = ChessBoard.SplitStack(stack, 2);
         Assert.NotNull(upper);
         Assert.NotNull(lower);
         Assert.Equal(2, upper.Count);
         Assert.Single(lower);
-        Assert.Equal(PieceType.Ratnik, upper[0].Type);
-        Assert.Equal(PieceType.Horseman, upper[1].Type);
-        Assert.Equal(PieceType.Archer, lower[0].Type);
+        Assert.Equal(PieceType.Horseman, upper[0].Type); // верхняя часть: Horseman (средняя)
+        Assert.Equal(PieceType.Archer, upper[1].Type);   // верхняя часть: Archer (верхняя)
+        Assert.Equal(PieceType.Ratnik, lower[0].Type);   // нижняя часть: Ratnik
     }
 }

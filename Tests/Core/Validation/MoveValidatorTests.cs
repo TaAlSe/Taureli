@@ -81,12 +81,12 @@ public class MoveValidatorTests
         // Добавляем короля, чтобы валидация проходила
         board.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
 
+        // Сохраняем состояние до проверки (глубокое копирование)
+        var beforeFromStack = board.GetStack(pos)?.ToList();
+        var beforeToStack = board.GetStack(new Position(0, 1))?.ToList();
+
         // Делаем ход (перемещаем верхнюю фигуру)
         var move = new Move(pos, new Position(0, 1));
-
-        // Сохраняем состояние до проверки
-        var beforeFromStack = board.GetStack(pos);
-        var beforeToStack = board.GetStack(new Position(0, 1));
 
         // Вызываем валидатор (он должен выполнить и откатить ход)
         _ = MoveValidator.IsLegalMove(board, move);

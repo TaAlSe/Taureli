@@ -138,8 +138,9 @@ public class ChessBoard : IBoard
     {
         if (stack == null || count <= 0 || count >= stack.Count)
             return (null, stack);
-        var upper = stack.Take(count).ToList();
-        var lower = stack.Skip(count).ToList();
+        // Верхние count фигур — это последние count элементов
+        var upper = stack.Skip(stack.Count - count).ToList();
+        var lower = stack.Take(stack.Count - count).ToList();
         return (upper, lower);
     }
 
