@@ -61,4 +61,41 @@ public class MoveValidatorTests
         var illegalMove = new Move(new Position(1, 4), new Position(1, 5)); // e2-f2
         Assert.False(MoveValidator.IsLegalMove(board, illegalMove));
     }
+
+    /// <summary>
+    /// Проверяет, что IsLegalMove не изменяет состояние доски (откатывает ход).
+    /// </summary>
+    [Fact]
+    public void IsLegalMove_DoesNotMutateBoard()
+    {
+        var board = new ChessBoard();
+        // Создаём башню из трёх фигур
+        var stack = new List<Piece>
+    {
+        new(PieceType.Ratnik, PieceColor.White),
+        new(PieceType.Horseman, PieceColor.White),
+        new(PieceType.Archer, PieceColor.White)
+    };
+        var pos = new Position(0, 0);
+        board.SetStack(pos, stack);
+        // Добавляем короля, чтобы валидация проходила
+        board.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
+
+        // Делаем ход (перемещаем верхнюю фигуру)
+        var move = new Move(pos, new Position(0, 1));
+
+        // Сохраняем состояние до проверки
+        var beforeFromStack = board.GetStack(pos);
+        var beforeToStack = board.GetStack(new Position(0, 1));
+
+        // Вызываем валидатор (он должен выполнить и откатить ход)
+        _ = MoveValidator.IsLegalMove(board, move);
+
+        // Проверяем, что стеки не изменились
+        var afterFromStack = board.GetStack(pos);
+        var afterToStack = board.GetStack(new Position(0, 1));
+
+        Assert.Equal(beforeFromStack, afterFromStack);
+        Assert.Equal(beforeToStack, afterToStack);
+    }
 }

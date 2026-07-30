@@ -45,7 +45,7 @@ public class BoardTests
     {
         var board = new ChessBoard();
         var piece = new Piece(PieceType.Helgi, PieceColor.White);
-        board.SetPiece(new Position(4, 4), piece);
+        board.SetPiece(4, 4, piece);
 
         Assert.Same(piece, board.GetTopPiece(new Position(4, 4)));
     }
@@ -74,6 +74,7 @@ public class BoardTests
     public void SetPiece_InvalidPosition_ThrowsArgumentException()
     {
         var board = new ChessBoard();
+        Assert.Throws<ArgumentException>(() => board.SetPiece(8, 4, new Piece(PieceType.Ratnik, PieceColor.White)));
         Assert.Throws<ArgumentException>(() => board.SetPiece(new Position(8, 4), new Piece(PieceType.Ratnik, PieceColor.White)));
     }
 

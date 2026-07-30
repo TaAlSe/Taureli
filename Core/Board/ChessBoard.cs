@@ -117,6 +117,11 @@ public class ChessBoard : IBoard
         _stacks[pos.Row, pos.Col] = piece != null ? [piece] : null;
     }
 
+    /// <summary>
+    /// Устанавливает фигуру в заданную клетку (можно null для очистки).
+    /// </summary>
+    public void SetPiece(int row, int col, Piece? piece) => SetPiece(new Position(row, col), piece);
+
     // --- Вспомогательные методы для башен ---
 
     /// <summary>Соединяет две башни (top ставится поверх bottom).</summary>

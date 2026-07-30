@@ -19,32 +19,37 @@ public static class MoveValidator
     /// <returns>true, если ход легален.</returns>
     public static bool IsLegalMove(ChessBoard board, Move move)
     {
-        // 1. Проверяем, что фигура существует и соответствует цвету
+        // 1. Проверяем, что фигура существует
         var movingPiece = board.GetTopPiece(move.From);
         if (movingPiece == null)
             return false;
 
         var currentColor = movingPiece.Color;
 
-        // 2. Проверяем, что ход допустим по правилам движения (генератор ходов)
-        //var possibleMoves = MoveGenerator.GetMovesForPiece(board, move.From);
-        //if (!possibleMoves.Any(m => m.Equals(move)))
-        //    return false;
+        // 2. Проверка генератора (пока закомментирована, адаптируем позже)
+        // var possibleMoves = MoveGenerator.GetMovesForPiece(board, move.From);
+        // if (!possibleMoves.Any(m => m.Equals(move)))
+        //     return false;
 
-        // 3. Сохраняем состояние для отката
-        var capturedPiece = board.GetTopPiece(move.To);
+        // 3. Сохраняем стеки для отката (включая null)
+        var fromStack = board.GetStack(move.From);
+        var toStack = board.GetStack(move.To);
         PieceType? promotionType = move.PromotionType;
 
-        // 4. Выполняем ход временно
+        // 4. Временно выполняем ход
         if (promotionType.HasValue)
         {
-            board.SetPiece(move.To, new Piece(promotionType.Value, currentColor));
+            // Превращение: удаляем пешку, ставим новую фигуру
+            board.PopPiece(move.From);
+            board.PushPiece(move.To, new Piece(promotionType.Value, currentColor));
         }
         else
         {
-            board.SetPiece(move.To, movingPiece);
+            // Обычный ход (без разделения): перемещаем верхнюю фигуру
+            var piece = board.PopPiece(move.From);
+            if (piece != null)
+                board.PushPiece(move.To, piece);
         }
-        board.SetPiece(move.From, null);
 
         // 5. Проверяем, не остался ли король под шахом
         var kingPos = FindKing(board, currentColor);
@@ -55,9 +60,9 @@ public static class MoveValidator
             isLegal = !AttackDetector.IsSquareAttacked(board, kingPos.Value, opponentColor);
         }
 
-        // 6. Откатываем ход
-        board.SetPiece(move.From, movingPiece);
-        board.SetPiece(move.To, capturedPiece);
+        // 6. Откатываем ход (восстанавливаем стеки)
+        board.SetStack(move.From, fromStack);
+        board.SetStack(move.To, toStack);
 
         return isLegal;
     }
