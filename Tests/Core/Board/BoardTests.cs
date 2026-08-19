@@ -112,16 +112,17 @@ public class BoardTests
     public void SplitStack_MovesOnlyTopPart()
     {
         var board = new ChessBoard();
-        // Добавляем короля для валидации
+        // Добавляем короля и обновляем его позицию вручную
         board.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
+        board.UpdateKingPosition(PieceColor.White, new Position(0, 4));
 
-        // Башня: снизу вверх: Ratnik, Horseman, Ratoborets
+        // Создаём башню: снизу вверх Ratnik, Horseman, Ratoborets (ладья)
         var stack = new List<Piece>
-    {
-        new(PieceType.Ratnik, PieceColor.White),      // нижняя
-        new(PieceType.Horseman, PieceColor.White),    // средняя
-        new(PieceType.Ratoborets, PieceColor.White)   // верхняя (ладья)
-    };
+        {
+            new(PieceType.Ratnik, PieceColor.White),
+            new(PieceType.Horseman, PieceColor.White),
+            new(PieceType.Ratoborets, PieceColor.White)
+        };
         board.SetStack(new Position(0, 0), stack);
 
         // Ходим верхней частью (2 фигуры) на (0,1) — ладья может пойти по горизонтали
@@ -139,7 +140,7 @@ public class BoardTests
         var moved = board.GetStack(new Position(0, 1));
         Assert.NotNull(moved);
         Assert.Equal(2, moved.Count);
-        Assert.Equal(PieceType.Ratoborets, moved[^1].Type); // верхняя фигура — ладья
+        Assert.Equal(PieceType.Ratoborets, moved[^1].Type);
     }
 
     /// <summary>

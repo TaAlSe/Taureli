@@ -33,7 +33,7 @@ public class ChessBoard : IBoard
     /// </summary>
     /// <param name="color">Цвет короля.</param>
     /// <param name="newPosition">Новая позиция (может быть null, если король снят с доски).</param>
-    private void UpdateKingPosition(PieceColor color, Position? newPosition)
+    public void UpdateKingPosition(PieceColor color, Position? newPosition)
     {
         if (color == PieceColor.White)
             WhiteKingPosition = newPosition;
