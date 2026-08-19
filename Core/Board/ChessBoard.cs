@@ -23,6 +23,23 @@ public class ChessBoard : IBoard
     public bool BlackCanCastleKingSide { get; private set; }
     /// <summary>Может ли чёрный сделать длинную рокировку.</summary>
     public bool BlackCanCastleQueenSide { get; private set; }
+    /// <summary>Текущая позиция белого короля (null, если король отсутствует на доске).</summary>
+    public Position? WhiteKingPosition { get; private set; }
+    /// <summary>Текущая позиция чёрного короля (null, если король отсутствует на доске).</summary>
+    public Position? BlackKingPosition { get; private set; }
+
+    /// <summary>
+    /// Обновляет позицию короля указанного цвета.
+    /// </summary>
+    /// <param name="color">Цвет короля.</param>
+    /// <param name="newPosition">Новая позиция (может быть null, если король снят с доски).</param>
+    private void UpdateKingPosition(PieceColor color, Position? newPosition)
+    {
+        if (color == PieceColor.White)
+            WhiteKingPosition = newPosition;
+        else
+            BlackKingPosition = newPosition;
+    }
 
     // Конструкторы по умолчанию устанавливают все права в true
     /// <summary>
@@ -44,15 +61,28 @@ public class ChessBoard : IBoard
         BlackCanCastleKingSide = blackCanCastleKingSide;
         BlackCanCastleQueenSide = blackCanCastleQueenSide;
 
-        if (initialPosition != null)
+        if (initialPosition == null)
+            return;
+
+        for (int row = 0; row < Size; row++)
         {
-            for (int row = 0; row < Size; row++)
+            for (int col = 0; col < Size; col++)
             {
-                for (int col = 0; col < Size; col++)
-                {
-                    var piece = initialPosition[row, col];
-                    _stacks[row, col] = piece != null ? [piece] : null;
-                }
+                var piece = initialPosition[row, col];
+
+                if (piece == null)
+                    continue;
+
+                _stacks[row, col] = [piece];
+
+                if (piece.Type != PieceType.Volkhv)
+                    continue;
+
+                var pos = new Position(row, col);
+                if (piece.Color == PieceColor.White)
+                    WhiteKingPosition = pos;
+                else
+                    BlackKingPosition = pos;
             }
         }
     }
@@ -169,31 +199,35 @@ public class ChessBoard : IBoard
     /// 3. Выполняем ход в зависимости от типа
     /// </summary>
     /// <param name="move"></param>
-    /// <param name="splitCount"></param>
     /// <exception cref="InvalidOperationException"></exception>
-    public void ExecuteMoveInternal(Move move, int? splitCount)
+    public void ExecuteMoveInternal(Move move)
     {
         var currentColor = GetTopPiece(move.From)?.Color ?? throw new InvalidOperationException("No piece at from");
+
+        // Обновление позиции короля будет сделано после перемещения
 
         if (move.IsCastling)
         {
             ExecuteCastling(move, currentColor);
+            // после рокировки обновим позиции короля
+            UpdateKingPosition(currentColor, move.To);
         }
         else if (move.PromotionType.HasValue)
         {
             // Превращение: удаляем пешку, ставим новую фигуру
             PopPiece(move.From);
             PushPiece(move.To, new Piece(move.PromotionType.Value, currentColor));
+            // Пешка превращается, но если это была пешка, то позиция короля не меняется
         }
         else
         {
-            // Обычный ход: либо вся башня, либо часть
+            // обычный ход
             List<Piece>? movingStack;
-            if (splitCount.HasValue && splitCount.Value > 0)
+            if (move.SplitCount.HasValue && move.SplitCount.Value > 0)
             {
                 // Разделяем башню
                 var stack = GetStack(move.From);
-                if (stack == null || splitCount.Value >= stack.Count)
+                if (stack == null || move.SplitCount.Value >= stack.Count)
                 {
                     // Если splitCount >= размеру стека, перемещаем всю башню (как обычный ход)
                     movingStack = stack;
@@ -202,7 +236,7 @@ public class ChessBoard : IBoard
                 else
                 {
                     // Разделяем: верхние splitCount фигур уходят, нижние остаются
-                    var (upper, lower) = SplitStack(stack, splitCount.Value);
+                    var (upper, lower) = SplitStack(stack, move.SplitCount.Value);
                     movingStack = upper;
                     SetStack(move.From, lower);
                 }
@@ -220,6 +254,12 @@ public class ChessBoard : IBoard
                 var targetStack = GetStack(move.To);
                 var newStack = ConcatStacks(targetStack, movingStack);
                 SetStack(move.To, newStack);
+            }
+
+            // Если перемещалась башня, содержащая короля, то обновляем его позицию
+            if (movingStack != null && movingStack.Any(p => p.Type == PieceType.Volkhv))
+            {
+                UpdateKingPosition(currentColor, move.To);
             }
         }
     }
@@ -268,14 +308,13 @@ public class ChessBoard : IBoard
     /// Выполняет ход на доске.
     /// </summary>
     /// <param name="move">Ход, который нужно выполнить.</param>
-    /// <param name="splitCount">Количество верхних фигур, которые нужно переместить (если null, перемещается вся башня).</param>
     /// <returns>true, если ход выполнен успешно.</returns>
-    public bool MakeMove(Move move, int? splitCount = null)
+    public bool MakeMove(Move move)
     {
         if (!MoveValidator.IsLegalMove(this, move))
             return false;
 
-        ExecuteMoveInternal(move, splitCount ?? move.SplitCount);
+        ExecuteMoveInternal(move);
         UpdateCastlingRights(move);
         return true;
     }
@@ -301,6 +340,14 @@ public class ChessBoard : IBoard
             PushPiece(new Position(row, rookToCol), rook);
         }
     }
+
+    /// <summary>
+    /// Находит позицию короля указанного цвета на доске (использует кэшированные позиции).
+    /// </summary>
+    public Position? FindKing(PieceColor color)
+    {
+        return color == PieceColor.White ? WhiteKingPosition : BlackKingPosition;
+    }
 }
 
 public interface IBoard
@@ -311,7 +358,7 @@ public interface IBoard
     void PushPiece(Position pos, Piece piece);
     Piece? PopPiece(Position pos);
     void SetPiece(Position pos, Piece? piece); // оставляем для удобства тестов
-    bool MakeMove(Move move, int? splitCount = null);
+    bool MakeMove(Move move);
     void UpdateCastlingRights(Move move);
     bool WhiteCanCastleKingSide { get; }
     bool WhiteCanCastleQueenSide { get; }

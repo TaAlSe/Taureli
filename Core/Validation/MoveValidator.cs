@@ -19,12 +19,17 @@ public static class MoveValidator
     /// <returns>true, если ход легален.</returns>
     public static bool IsLegalMove(ChessBoard board, Move move)
     {
+        // Проверка, что ход присутствует в генераторе (с учётом SplitCount)
+        var possibleMoves = MoveGenerator.GetMovesForPiece(board, move.From);
+        if (!possibleMoves.Any(m => m.Equals(move)))
+            return false;
+
         // Сохраняем копии стеков для отката
         var fromStackCopy = board.GetStack(move.From)?.ToList();
         var toStackCopy = board.GetStack(move.To)?.ToList();
 
         // Выполняем ход через внутренний метод
-        board.ExecuteMoveInternal(move, move.SplitCount);
+        board.ExecuteMoveInternal(move);
 
         // Находим цвет фигуры, которая ходила (она должна быть на доске)
         var movingPiece = board.GetTopPiece(move.From) ?? board.GetTopPiece(move.To);
@@ -57,17 +62,7 @@ public static class MoveValidator
     /// </summary>
     private static Position? FindKing(ChessBoard board, PieceColor color)
     {
-        for (int row = 0; row < 8; row++)
-        {
-            for (int col = 0; col < 8; col++)
-            {
-                var pos = new Position(row, col);
-                var piece = board.GetTopPiece(pos);
-                if (piece != null && piece.Type == PieceType.Volkhv && piece.Color == color)
-                    return pos;
-            }
-        }
-        return null;
+        return color == PieceColor.White ? board.WhiteKingPosition : board.BlackKingPosition;
     }
 
     /// <summary>

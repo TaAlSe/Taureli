@@ -124,8 +124,8 @@ public class BoardTests
         board.SetStack(new Position(0, 0), stack);
 
         // Ходим верхней частью (2 фигуры) на (0,1)
-        var move = new Move(new Position(0, 0), new Position(0, 1));
-        var result = board.MakeMove(move, 2);
+        var move = new Move(new Position(0, 0), new Position(0, 1)) { SplitCount = 2 };
+        var result = board.MakeMove(move);
         Assert.True(result);
 
         // Проверяем, что на (0,0) осталась 1 фигура (Ratnik)
@@ -249,5 +249,16 @@ public class BoardTests
         // Проверяем, что e1 и h1 пусты
         Assert.Null(board.GetTopPiece(new Position(0, 4)));
         Assert.Null(board.GetTopPiece(new Position(0, 7)));
+    }
+
+    /// <summary>
+    /// Проверяет, что позиции королей корректно инициализируются при создании доски.
+    /// </summary>
+    [Fact]
+    public void KingPositions_InitializedCorrectly()
+    {
+        var board = new ChessBoard(PieceFactory.StartingPosition());
+        Assert.Equal(new Position(0, 4), board.WhiteKingPosition);
+        Assert.Equal(new Position(7, 4), board.BlackKingPosition);
     }
 }
