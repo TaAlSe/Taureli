@@ -51,8 +51,15 @@ public class Move(Position from, Position to, PieceType? promotionType = null)
 
     public override string ToString()
     {
-        var promotion = PromotionType.HasValue ? $" ({PromotionType})" : "";
-        return $"{From} -> {To}{promotion}";
+        var sb = new System.Text.StringBuilder();
+        sb.Append($"{From} -> {To}");
+        if (PromotionType.HasValue)
+            sb.Append($" (promotion to {PromotionType})");
+        if (IsCastling)
+            sb.Append(" (castling)");
+        if (SplitCount.HasValue)
+            sb.Append($" (split: {SplitCount})");
+        return sb.ToString();
     }
 }
 

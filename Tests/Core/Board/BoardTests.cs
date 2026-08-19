@@ -115,15 +115,16 @@ public class BoardTests
         // Добавляем короля для валидации
         board.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
 
+        // Башня: снизу вверх: Ratnik, Horseman, Ratoborets
         var stack = new List<Piece>
-        {
-            new(PieceType.Ratnik, PieceColor.White),
-            new(PieceType.Horseman, PieceColor.White),
-            new(PieceType.Archer, PieceColor.White)
-        };
+    {
+        new(PieceType.Ratnik, PieceColor.White),      // нижняя
+        new(PieceType.Horseman, PieceColor.White),    // средняя
+        new(PieceType.Ratoborets, PieceColor.White)   // верхняя (ладья)
+    };
         board.SetStack(new Position(0, 0), stack);
 
-        // Ходим верхней частью (2 фигуры) на (0,1)
+        // Ходим верхней частью (2 фигуры) на (0,1) — ладья может пойти по горизонтали
         var move = new Move(new Position(0, 0), new Position(0, 1)) { SplitCount = 2 };
         var result = board.MakeMove(move);
         Assert.True(result);
@@ -134,11 +135,11 @@ public class BoardTests
         Assert.Single(remaining);
         Assert.Equal(PieceType.Ratnik, remaining[0].Type);
 
-        // Проверяем, что на (0,1) теперь 2 фигуры (Archer + Horseman)
+        // Проверяем, что на (0,1) теперь 2 фигуры (Horseman + Ratoborets)
         var moved = board.GetStack(new Position(0, 1));
         Assert.NotNull(moved);
         Assert.Equal(2, moved.Count);
-        Assert.Equal(PieceType.Archer, moved[^1].Type); // верхняя фигура — Archer
+        Assert.Equal(PieceType.Ratoborets, moved[^1].Type); // верхняя фигура — ладья
     }
 
     /// <summary>
