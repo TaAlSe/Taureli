@@ -39,7 +39,8 @@ public static class PawnMoveGenerator
             if (board.GetTopPiece(targetPos) == null)
             {
                 // Ход с превращением, если достигли последней горизонтали (пока null).
-                moves.Add(new Move(from, targetPos));
+                PieceType? promotionType = piece.PromotionTarget; // может быть null
+                moves.Add(new Move(from, targetPos, promotionType));
             }
         }
 
@@ -77,7 +78,8 @@ public static class PawnMoveGenerator
             if (targetPiece != null && targetPiece.Color != piece.Color)
             {
                 // Если пешка достигает последней горизонтали — превращение (пока null).
-                moves.Add(new Move(from, targetPos));
+                PieceType? promotionType = piece.PromotionTarget; // может быть null
+                moves.Add(new Move(from, targetPos, promotionType));
             }
         }
 

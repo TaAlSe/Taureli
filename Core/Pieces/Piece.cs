@@ -1,13 +1,28 @@
 ﻿namespace Core.Pieces;
 
 /// <summary>
-/// Неизменяемая таврель (фигура), содержащая тип и цвет.
-/// В будущем может хранить также "башню" (стек фигур), но для MVP — простая.
+/// Неизменяемая таврель (фигура), содержащая тип, цвет и тип превращения для пешек.
 /// </summary>
-/// <param name="Type">Тип таврели (Volkhv, Horseman, ...)</param>
-/// <param name="Color">Цвет (белый/чёрный)</param>
-public record Piece(PieceType Type, PieceColor Color)
+/// <param name="Type">Тип таврели.</param>
+/// <param name="Color">Цвет.</param>
+/// <param name="PromotionTarget">Тип фигуры, в которую превращается пешка (только для пешек, иначе null).</param>
+public record Piece(PieceType Type, PieceColor Color, PieceType? PromotionTarget = null)
 {
+    /// <summary>
+    /// Тип таврели.
+    /// </summary>
+    public PieceType Type { get; } = Type;
+
+    /// <summary>
+    /// Цвет.
+    /// </summary>
+    public PieceColor Color { get; } = Color;
+
+    /// <summary>
+    /// Тип фигуры, в которую превращается пешка (только для пешек, иначе null).
+    /// </summary>
+    public PieceType? PromotionTarget { get; } = PromotionTarget;
+
     /// <summary>
     /// Возвращает двухбуквенный код для отладки/консоли (например, "Vo", "ho").
     /// Временное решение — используем первые буквы (позже заменим на изображения).

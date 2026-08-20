@@ -14,7 +14,15 @@ public static class PieceFactory
     {
         var board = new Piece?[8, 8];
 
-        // Белые (ряд 0, он же 1-я горизонталь)
+        // Определяем, перед какой фигурой стоит пешка
+        // Фигуры: 0 - ладья, 1 - конь, 2 - слон, 3 - ферзь, 4 - король, 5 - слон, 6 - конь, 7 - ладья
+        PieceType[] backRowTypes =
+        [
+            PieceType.Ratoborets, PieceType.Horseman, PieceType.Archer, PieceType.Knyaz,
+            PieceType.Volkhv, PieceType.Archer, PieceType.Horseman, PieceType.Ratoborets
+        ];
+
+        // Белые фигуры (нижний ряд)
         board[0, 0] = new Piece(PieceType.Ratoborets, PieceColor.White);
         board[0, 1] = new Piece(PieceType.Horseman, PieceColor.White);
         board[0, 2] = new Piece(PieceType.Archer, PieceColor.White);
@@ -26,13 +34,25 @@ public static class PieceFactory
 
         // Белые пешки (ряд 1)
         for (int col = 0; col < 8; col++)
-            board[1, col] = new Piece(PieceType.Ratnik, PieceColor.White);
+        {
+            var promotionTarget = backRowTypes[col];
+            // Для пешки перед королём (col=4) – превращение в Helgi
+            if (col == 4)
+                promotionTarget = PieceType.Helgi;
+            board[1, col] = new Piece(PieceType.Ratnik, PieceColor.White, promotionTarget);
+        }
 
         // Чёрные пешки (ряд 6)
+        // Чёрные фигуры на row=7
         for (int col = 0; col < 8; col++)
-            board[6, col] = new Piece(PieceType.Ratnik, PieceColor.Black);
+        {
+            var promotionTarget = backRowTypes[col];
+            if (col == 4)
+                promotionTarget = PieceType.Helgi;
+            board[6, col] = new Piece(PieceType.Ratnik, PieceColor.Black, promotionTarget);
+        }
 
-        // Чёрные (ряд 7)
+        // Чёрные фигуры (верхний ряд)
         board[7, 0] = new Piece(PieceType.Ratoborets, PieceColor.Black);
         board[7, 1] = new Piece(PieceType.Horseman, PieceColor.Black);
         board[7, 2] = new Piece(PieceType.Archer, PieceColor.Black);
