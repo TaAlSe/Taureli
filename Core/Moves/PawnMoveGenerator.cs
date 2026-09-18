@@ -29,6 +29,7 @@ public static class PawnMoveGenerator
 
         // Начальный ряд для двойного хода: для белых — 1 (вторая горизонталь), для чёрных — 6 (седьмая).
         int startRow = piece.Color == PieceColor.White ? 1 : 6;
+        int promotionRow = piece.Color == PieceColor.White ? 7 : 0;
 
         // 1. Ход на 1 клетку вперёд
         int newRow = from.Row + direction;
@@ -39,7 +40,7 @@ public static class PawnMoveGenerator
             if (board.GetTopPiece(targetPos) == null)
             {
                 // Ход с превращением, если достигли последней горизонтали (пока null).
-                PieceType? promotionType = piece.PromotionTarget; // может быть null
+                PieceType? promotionType = (newRow == promotionRow) ? piece.PromotionTarget : null;
                 moves.Add(new Move(from, targetPos, promotionType));
             }
         }
@@ -78,7 +79,7 @@ public static class PawnMoveGenerator
             if (targetPiece != null && targetPiece.Color != piece.Color)
             {
                 // Если пешка достигает последней горизонтали — превращение (пока null).
-                PieceType? promotionType = piece.PromotionTarget; // может быть null
+                PieceType? promotionType = (targetRow == promotionRow) ? piece.PromotionTarget : null;
                 moves.Add(new Move(from, targetPos, promotionType));
             }
         }
