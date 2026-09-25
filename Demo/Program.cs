@@ -1,4 +1,6 @@
-﻿using Core.Board;
+﻿// Demo/Program.cs
+
+using Core.Board;
 using Core.Moves;
 using Core.Pieces;
 

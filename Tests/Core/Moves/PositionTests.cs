@@ -1,4 +1,6 @@
-﻿using Core.Moves;
+﻿// Tests/Core/Moves/PositionTests.cs
+
+using Core.Moves;
 
 namespace Tests.Core.Moves;
 

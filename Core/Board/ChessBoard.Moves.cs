@@ -1,4 +1,6 @@
-﻿using Core.Moves;
+﻿// Core/Board/ChessBoard.Moves.cs
+
+using Core.Moves;
 using Core.Pieces;
 using Core.Validation;
 

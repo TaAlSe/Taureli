@@ -1,4 +1,6 @@
-﻿using Core.Board;
+﻿// Core/Moves/MoveGenerator.cs
+
+using Core.Board;
 using Core.Pieces;
 
 namespace Core.Moves;

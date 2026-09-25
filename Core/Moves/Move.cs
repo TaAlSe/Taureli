@@ -1,4 +1,6 @@
-﻿using Core.Pieces;
+﻿// Core/Moves/Move
+
+using Core.Pieces;
 
 namespace Core.Moves;
 

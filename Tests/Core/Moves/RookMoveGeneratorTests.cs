@@ -1,4 +1,6 @@
-﻿using Core.Board;
+﻿// Tests/Core/Moves/RookMoveGeneratorTests.cs
+
+using Core.Board;
 using Core.Moves;
 using Core.Pieces;
 

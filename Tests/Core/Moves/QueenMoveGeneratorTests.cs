@@ -1,4 +1,6 @@
-﻿using Core.Board;
+﻿// Tests/Core/Moves/QueenMoveGeneratorTests.cs
+
+using Core.Board;
 using Core.Moves;
 using Core.Pieces;
 

@@ -1,4 +1,6 @@
-﻿namespace Core.Moves;
+﻿// Core/Moves/Directions.cs
+
+namespace Core.Moves;
 
 /// <summary>
 /// Содержит все возможные направления движения фигур.

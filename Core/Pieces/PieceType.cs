@@ -1,4 +1,6 @@
-﻿namespace Core.Pieces;
+﻿// Core/Pieces/PieceType.cs
+
+namespace Core.Pieces;
 
 /// <summary>
 /// Типы таврелей (фигур) в русских шахматах.

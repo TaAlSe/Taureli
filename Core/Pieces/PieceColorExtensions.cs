@@ -1,4 +1,6 @@
-﻿namespace Core.Pieces;
+﻿// Core/Pieces/PieceColorExtensions.cs
+
+namespace Core.Pieces;
 
 /// <summary>
 /// Метод расширения для получения противоположного цвета.

@@ -1,4 +1,6 @@
-﻿using Core.Moves;
+﻿// Core/Board/ChessBoard.cs
+
+using Core.Moves;
 using Core.Pieces;
 
 namespace Core.Board;

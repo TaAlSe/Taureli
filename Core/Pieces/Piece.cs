@@ -1,4 +1,6 @@
-﻿namespace Core.Pieces;
+﻿// Core/Pieces/Piece.cs
+
+namespace Core.Pieces;
 
 /// <summary>
 /// Неизменяемая таврель (фигура), содержащая тип, цвет и тип превращения для пешек.

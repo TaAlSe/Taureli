@@ -1,4 +1,6 @@
-﻿namespace Core.Pieces;
+﻿// Core/Pieces/PieceFactory.cs
+
+namespace Core.Pieces;
 
 /// <summary>
 /// Вспомогательный класс для создания начальной позиции.

@@ -1,4 +1,6 @@
-﻿using Core.Board;
+﻿// Core/Moves/CastlingMoveGenerator.cs
+
+using Core.Board;
 using Core.Pieces;
 using Core.Attack;
 

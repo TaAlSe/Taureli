@@ -1,4 +1,6 @@
-﻿using Core.Board;
+﻿// Tests/Core/Validation/MoveValidatorTests.cs
+
+using Core.Board;
 using Core.Pieces;
 using Core.Moves;
 using Core.Validation;

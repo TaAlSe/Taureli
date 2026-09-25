@@ -1,4 +1,6 @@
-﻿using Core.Board;
+﻿// Core/Moves/LinearMoveGenerator
+
+using Core.Board;
 
 namespace Core.Moves;
 

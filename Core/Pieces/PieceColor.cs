@@ -1,4 +1,6 @@
-﻿namespace Core.Pieces;
+﻿// Core/Pieces/PieceColor.cs
+
+namespace Core.Pieces;
 
 /// <summary>
 /// Цвет таврели (фигуры).

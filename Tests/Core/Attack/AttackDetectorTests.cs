@@ -1,4 +1,6 @@
-﻿using Core.Attack;
+﻿// Tests/Core/Attack/AttackDetectorTests.cs
+
+using Core.Attack;
 using Core.Board;
 using Core.Moves;
 using Core.Pieces;

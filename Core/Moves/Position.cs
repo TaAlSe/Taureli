@@ -1,4 +1,6 @@
-﻿namespace Core.Moves;
+﻿// Core/Moves/Position.cs
+
+namespace Core.Moves;
 
 /// <summary>
 /// Неизменяемая структура, представляющая координаты клетки (строка, столбец).

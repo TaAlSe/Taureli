@@ -1,4 +1,6 @@
-﻿using Core.Board;
+﻿// Tests/Core/Board/BoardTests.cs
+
+using Core.Board;
 using Core.Moves;
 using Core.Pieces;
 
