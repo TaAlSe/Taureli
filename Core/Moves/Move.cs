@@ -1,4 +1,4 @@
-﻿// Core/Moves/Move
+﻿// Core/Moves/Move.cs
 
 using Core.Pieces;
 
