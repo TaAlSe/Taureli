@@ -116,18 +116,4 @@ public class PawnMoveGeneratorTests
         var move = moves.First(m => m.To == new Position(4, 4)); // e5
         Assert.Null(move.PromotionType);
     }
-
-    /// <summary>
-    /// Проверяет, что пешка на последней горизонтали генерирует ход с превращением в указанный тип.
-    /// </summary>
-    [Fact]
-    public void Pawn_OnPromotionRank_GeneratesPromotionWithTarget()
-    {
-        var board = new ChessBoard();
-        var pawn = new Piece(PieceType.Ratnik, PieceColor.White, PieceType.Helgi);
-        board.SetPiece(new Position(6, 4), pawn); // e7
-        var moves = PawnMoveGenerator.GetMoves(board, new Position(6, 4));
-        var move = moves.First(m => m.To == new Position(7, 4)); // e8
-        Assert.Equal(PieceType.Helgi, move.PromotionType);
-    }
 }

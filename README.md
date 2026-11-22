@@ -83,7 +83,12 @@ MVP десктопного приложения для игры в таврел�
 
 - [ ] 2.2.3.1. `Core/Moves/Move.cs`: `public bool IsEnPassant { get; init; } = false;`, учесть в `Equals`/`GetHashCode`/`ToString`.
 - [ ] 2.2.3.2. `Core/Moves/PawnMoveGenerator.cs`: генерация e.p. (проверка `board.LastMove`, двойного хода Ratnik’а, горизонтали, соседней вертикали, пустой целевой клетки).
-- [ ] 2.2.3.3. `Core/Board/ChessBoard.Moves.cs`: ветка `if (move.IsEnPassant)` **до** общей ветки (снять нашу пешку с `From`, снять вражескую башню с `enemyPos`, откатить `IsPromoted` при необходимости, собрать новую башню на `To`).
+- [ ] 2.2.3.3. `Core/Board/ChessBoard.Moves.cs`: ветка `if (move.IsEnPassant)` **до** общей ветки:
+  - снять нашу пешку с `From` (`PopPiece`);
+  - снять **только верхнего Ratnik’а** с `enemyPos` (`PopPiece`), остальная часть вражеской башни остаётся на `enemyPos`;
+  - положить пленного ратника на `To`, сверху — нашу пешку; обоим `HasMoved = true`;
+  - `TryPromote(move.To)`.
+- [ ] 2.2.3.3а. `Core/Moves/MoveGenerator.cs`: в блоке split запретить split для `IsEnPassant` (`if (move.IsCastling || move.IsEnPassant) continue;`). Зафиксировать решение комментарием.
 - [ ] 2.2.3.4. `Core/Moves/MoveGenerator.cs`: в split пробрасывать `IsEnPassant = move.IsEnPassant`.
 - [ ] 2.2.3.5. `Core/Validation/MoveValidator.cs`: при `move.IsEnPassant` сохранять/восстанавливать стек `enemyPos`.
 - [ ] 2.2.3.6. Тесты `Tests/Core/Board/EnPassantTests.cs`:
