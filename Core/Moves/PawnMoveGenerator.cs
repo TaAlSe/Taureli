@@ -31,24 +31,22 @@ public static class PawnMoveGenerator
 
         // Начальный ряд для двойного хода: для белых — 1 (вторая горизонталь), для чёрных — 6 (седьмая).
         int startRow = piece.Color == PieceColor.White ? 1 : 6;
-        int promotionRow = piece.Color == PieceColor.White ? 7 : 0;
 
-        // 1. Ход на 1 клетку вперёд
+        // 1. Ход на 1 клетку вперёд: на пустую клетку или на свою башню.
         int newRow = from.Row + direction;
         if (newRow >= 0 && newRow < 8)
         {
             // Позиция для хода.
             var targetPos = new Position(newRow, from.Col);
-            if (board.GetTopPiece(targetPos) == null)
-            {
-                // Ход с превращением, если достигли последней горизонтали (пока null).
-                PieceType? promotionType = (newRow == promotionRow) ? piece.PromotionTarget : null;
-                moves.Add(new Move(from, targetPos, promotionType));
-            }
+            var targetTop = board.GetTopPiece(targetPos);
+            if (targetTop == null || targetTop.Color == piece.Color)
+                moves.Add(new Move(from, targetPos));
         }
 
-        // 2. Ход на 2 клетки с начальной позиции
-        if (from.Row == startRow)
+        // 2. Двойной ход с начальной горизонтали: ратник не ходил,
+        //    промежуточная клетка пуста (нельзя перепрыгивать),
+        //    целевая — пуста или своя башня.
+        if (from.Row == startRow && !piece.HasMoved)
         {
             // Целевая строка для двойного хода.
             int twoStepRow = from.Row + 2 * direction;
@@ -58,14 +56,18 @@ public static class PawnMoveGenerator
                 var intermediatePos = new Position(from.Row + direction, from.Col);
                 // Позиция для хода.
                 var targetPos = new Position(twoStepRow, from.Col);
-                if (board.GetTopPiece(intermediatePos) == null && board.GetTopPiece(targetPos) == null)
+                var intermediateTop = board.GetTopPiece(intermediatePos);
+                var targetTop = board.GetTopPiece(targetPos);
+
+                if (intermediateTop == null
+                    && (targetTop == null || targetTop.Color == piece.Color))
                 {
                     moves.Add(new Move(from, targetPos));
                 }
             }
         }
 
-        // 3. Взятие по диагонали
+        // 3. Взятие по диагонали — только на вражескую фигуру.
         foreach (int colOffset in new[] { -1, 1 })
         {
             int targetCol = from.Col + colOffset;
@@ -75,15 +77,10 @@ public static class PawnMoveGenerator
             if (targetRow < 0 || targetRow >= 8) continue;
 
             var targetPos = new Position(targetRow, targetCol);
-            var targetPiece = board.GetTopPiece(targetPos);
+            var targetTop = board.GetTopPiece(targetPos);
 
-            // Взятие возможно только если на целевой клетке стоит вражеская фигура.
-            if (targetPiece != null && targetPiece.Color != piece.Color)
-            {
-                // Если пешка достигает последней горизонтали — превращение (пока null).
-                PieceType? promotionType = (targetRow == promotionRow) ? piece.PromotionTarget : null;
-                moves.Add(new Move(from, targetPos, promotionType));
-            }
+            if (targetTop != null && targetTop.Color != piece.Color)
+                moves.Add(new Move(from, targetPos));
         }
 
         return moves;

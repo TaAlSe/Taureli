@@ -63,6 +63,12 @@ public partial class ChessBoard
     /// <summary>Текущая позиция чёрного короля (null, если король отсутствует на доске).</summary>
     public Position? BlackKingPosition { get; private set; }
 
+    /// <summary>
+    /// Последний успешно выполненный ход (null, если ходов ещё не было).
+    /// Используется для правил, зависящих от предыдущего хода (взятие на проходе).
+    /// </summary>
+    public Move? LastMove { get; private set; }
+
     // Права на рокировку
     /// <summary>Может ли белый сделать короткую рокировку (с королевской стороны).</summary>
     public bool WhiteCanCastleKingSide { get; private set; }
