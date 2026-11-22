@@ -20,17 +20,20 @@ public partial class ChessBoard
 
         ExecuteMoveInternal(move);
         UpdateCastlingRights(move);
+        LastMove = move;
         return true;
     }
 
     /// <summary>
-    /// 3. Выполняем ход в зависимости от типа
+    /// Выполняет ход без проверки легальности.
+    /// Автоматически превращает ратника, достигшего последней горизонтали.
     /// </summary>
-    /// <param name="move"></param>
-    /// <exception cref="InvalidOperationException"></exception>
+    /// <param name="move">Ход.</param>
+    /// <exception cref="InvalidOperationException">Если на исходной клетке нет фигуры.</exception>
     public void ExecuteMoveInternal(Move move)
     {
-        var currentColor = GetTopPiece(move.From)?.Color ?? throw new InvalidOperationException("No piece at from");
+        var currentColor = GetTopPiece(move.From)?.Color
+            ?? throw new InvalidOperationException("Нет фигуры на исходной клетке");
 
         // Обновление позиции короля будет сделано после перемещения
 
@@ -39,56 +42,59 @@ public partial class ChessBoard
             ExecuteCastling(move, currentColor);
             // после рокировки обновим позиции короля
             UpdateKingPosition(currentColor, move.To);
+            return;
         }
-        else if (move.PromotionType.HasValue)
+
+        // Обычный ход (с возможным разделением башни).
+        List<Piece>? movingStack;
+        if (move.SplitCount is > 0)
         {
-            // Превращение: удаляем пешку, ставим новую фигуру
-            PopPiece(move.From);
-            PushPiece(move.To, new Piece(move.PromotionType.Value, currentColor));
-            // Пешка превращается, но если это была пешка, то позиция короля не меняется
-        }
-        else
-        {
-            // обычный ход
-            List<Piece>? movingStack;
-            if (move.SplitCount.HasValue && move.SplitCount.Value > 0)
+            // Разделяем башню
+            var stack = GetStack(move.From);
+            if (stack == null || move.SplitCount.Value >= stack.Count)
             {
-                // Разделяем башню
-                var stack = GetStack(move.From);
-                if (stack == null || move.SplitCount.Value >= stack.Count)
-                {
-                    // Если splitCount >= размеру стека, перемещаем всю башню (как обычный ход)
-                    movingStack = stack;
-                    SetStack(move.From, null);
-                }
-                else
-                {
-                    // Разделяем: верхние splitCount фигур уходят, нижние остаются
-                    var (upper, lower) = SplitStack(stack, move.SplitCount.Value);
-                    movingStack = upper;
-                    SetStack(move.From, lower);
-                }
+                // splitCount >= размеру стека — перемещаем всю башню.
+                movingStack = stack;
+                SetStack(move.From, null);
             }
             else
             {
-                // Вся башня
-                movingStack = GetStack(move.From);
-                SetStack(move.From, null);
+                // Разделяем: верхние splitCount фигур уходят, нижние остаются
+                var (upper, lower) = SplitStack(stack, move.SplitCount.Value);
+                movingStack = upper;
+                SetStack(move.From, lower);
             }
+        }
+        else
+        {
+            // Вся башня
+            movingStack = GetStack(move.From);
+            SetStack(move.From, null);
+        }
 
-            if (movingStack != null && movingStack.Count > 0)
-            {
-                // Добавляем перемещаемую часть на целевую клетку (слияние)
-                var targetStack = GetStack(move.To);
-                var newStack = ConcatStacks(targetStack, movingStack);
-                SetStack(move.To, newStack);
-            }
+        if (movingStack is { Count: > 0 })
+        {
+            // Добавляем перемещаемую часть на целевую клетку (слияние)
+            var targetStack = GetStack(move.To);
 
-            // Если перемещалась башня, содержащая короля, то обновляем его позицию
-            if (movingStack != null && movingStack.Any(p => p.Type == PieceType.Volkhv))
-            {
+            // Откат превращённой фигуры, если она оказалась под новой башней.
+            // Правило: превращённая фигура, на которую встаёт любая башня
+            // (своя или вражеская), переворачивается обратно в ратника.
+            if (targetStack is { Count: > 0 } && targetStack[^1].IsPromoted)
+                targetStack[^1] = RevertToRatnik(targetStack[^1]);
+
+            var newStack = ConcatStacks(targetStack, movingStack);
+            SetStack(move.To, newStack);
+
+            // Помечаем перемещённые фигуры как ходившие.
+            MarkMoved(move.To, movingStack.Count);
+
+            // Автоматическое превращение верхней фигуры (если ратник на последней горизонтали).
+            TryPromote(move.To);
+
+            // Если перемещался волхв — обновляем его позицию.
+            if (movingStack.Any(p => p.Type == PieceType.Volkhv))
                 UpdateKingPosition(currentColor, move.To);
-            }
         }
     }
 
@@ -101,16 +107,13 @@ public partial class ChessBoard
         // Перемещаем короля
         var king = PopPiece(move.From);
         if (king != null)
-        {
             PushPiece(move.To, king);
-        }
+
         // Перемещаем ладью
         int rookFromCol = move.CastlingSide == CastlingSide.KingSide ? 7 : 0;
         int rookToCol = move.CastlingSide == CastlingSide.KingSide ? 5 : 3;
         var rook = PopPiece(new Position(row, rookFromCol));
         if (rook != null)
-        {
             PushPiece(new Position(row, rookToCol), rook);
-        }
     }
 }

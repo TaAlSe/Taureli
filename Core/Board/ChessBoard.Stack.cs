@@ -93,4 +93,18 @@ public partial class ChessBoard
         var lower = stack.Take(stack.Count - count).ToList();
         return (upper, lower);
     }
+
+    /// <summary>
+    /// Помечает верхние <paramref name="movedCount"/> фигур стека как ходившие.
+    /// </summary>
+    private void MarkMoved(Position pos, int movedCount)
+    {
+        if (movedCount <= 0) return;
+        var stack = GetStack(pos);
+        if (stack is null) return;
+
+        int start = Math.Max(0, stack.Count - movedCount);
+        for (int i = start; i < stack.Count; i++)
+            stack[i] = stack[i] with { HasMoved = true };
+    }
 }

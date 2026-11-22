@@ -91,6 +91,12 @@ MVP десктопного приложения для игры в таврел�
 - [ ] 2.2.3.3а. `Core/Moves/MoveGenerator.cs`: в блоке split запретить split для `IsEnPassant` (`if (move.IsCastling || move.IsEnPassant) continue;`). Зафиксировать решение комментарием.
 - [ ] 2.2.3.4. `Core/Moves/MoveGenerator.cs`: в split пробрасывать `IsEnPassant = move.IsEnPassant`.
 - [ ] 2.2.3.5. `Core/Validation/MoveValidator.cs`: при `move.IsEnPassant` сохранять/восстанавливать стек `enemyPos`.
+- [ ] 2.2.3.5а. `Core/Validation/MoveValidator.cs`: сохранять и восстанавливать после симуляции:
+  - [ ] стеки `move.From` и `move.To` (уже есть);
+  - [ ] стек `enemyPos` при `IsEnPassant`;
+  - [ ] стеки `rookFrom`/`rookTo` при `IsCastling`;
+  - [ ] `WhiteKingPosition` и `BlackKingPosition`.
+  - [ ] Тест: снять `Skip` с `IsLegalMove_RestoresKingPositionAfterSimulation`, убедиться в красном → починить → зелёный.
 - [ ] 2.2.3.6. Тесты `Tests/Core/Board/EnPassantTests.cs`:
   - [ ] `BasicEnPassant_CapturesWholeStack`;
   - [ ] `EnPassant_WhenEnemyPawnOnTopOfStack_CapturesWholeStack`;
