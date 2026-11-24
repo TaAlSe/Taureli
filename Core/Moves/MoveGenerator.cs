@@ -78,18 +78,13 @@ public static class MoveGenerator
             var additionalMoves = new List<Move>();
             foreach (var move in moves)
             {
-                // Пропускаем рокировку и превращение (они не могут быть разделены)
-                if (move.IsCastling || move.PromotionType.HasValue)
+                // Рокировку нельзя разделить — это особый ход короля и ладьи.
+                if (move.IsCastling)
                     continue;
 
                 for (int k = 1; k < stack.Count; k++)
                 {
-                    var splitMove = new Move(move.From, move.To, move.PromotionType)
-                    {
-                        IsCastling = move.IsCastling,
-                        CastlingSide = move.CastlingSide,
-                        SplitCount = k
-                    };
+                    var splitMove = new Move(move.From, move.To) { SplitCount = k };
                     additionalMoves.Add(splitMove);
                 }
             }

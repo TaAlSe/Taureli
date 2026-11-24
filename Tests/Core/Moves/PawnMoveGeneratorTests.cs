@@ -116,4 +116,20 @@ public class PawnMoveGeneratorTests
         var move = moves.First(m => m.To == new Position(4, 4)); // e5
         Assert.Null(move.PromotionType);
     }
+
+    /// <summary>
+    /// Проверяет, что пешка на последней горизонтали генерирует ход на неё.
+    /// Само превращение выполняется при исполнении хода (см. PromotionTests).
+    /// </summary>
+    [Fact]
+    public void Pawn_OnLastRank_GeneratesMoveToLastRank()
+    {
+        var board = new ChessBoard();
+        var pawn = new Piece(PieceType.Ratnik, PieceColor.White, PieceType.Helgi);
+        board.SetPiece(new Position(6, 4), pawn);
+
+        var moves = PawnMoveGenerator.GetMoves(board, new Position(6, 4));
+
+        Assert.Contains(moves, m => m.To == new Position(7, 4));
+    }
 }

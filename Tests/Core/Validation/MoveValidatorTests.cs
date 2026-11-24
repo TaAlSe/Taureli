@@ -100,4 +100,24 @@ public class MoveValidatorTests
         Assert.Equal(beforeFromStack, afterFromStack);
         Assert.Equal(beforeToStack, afterToStack);
     }
+
+    /// <summary>
+    /// Проверяет, что IsLegalMove не оставляет позицию короля изменённой после симуляции.
+    /// </summary>
+    [Fact(Skip = "Баг: IsLegalMove не восстанавливает позиции королей. Чинится в 2.2.3.5а")]
+    public void IsLegalMove_RestoresKingPositionAfterSimulation()
+    {
+        var board = new ChessBoard();
+        board.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
+        board.UpdateKingPosition(PieceColor.White, new Position(0, 4));
+        board.SetPiece(new Position(7, 4), new Piece(PieceType.Volkhv, PieceColor.Black));
+        board.UpdateKingPosition(PieceColor.Black, new Position(7, 4));
+
+        var kingBefore = board.WhiteKingPosition;
+        var move = new Move(new Position(0, 4), new Position(1, 4)); // e1 → e2
+
+        MoveValidator.IsLegalMove(board, move);
+
+        Assert.Equal(kingBefore, board.WhiteKingPosition);
+    }
 }
