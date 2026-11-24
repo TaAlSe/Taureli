@@ -82,6 +82,7 @@ MVP десктопного приложения для игры в таврел�
 ### 2.2.3. Взятие на проходе (пленение)
 
 - [ ] 2.2.3.1. `Core/Moves/Move.cs`: `public bool IsEnPassant { get; init; } = false;`, учесть в `Equals`/`GetHashCode`/`ToString`.
+- [ ] 2.2.3.1а. `Core/Moves/Move.cs`: добавить `SplitCount` в `Equals`/`GetHashCode` (сейчас не сравнивается — семантическая ошибка). Заодно удалить `PromotionType` из `Equals`/`GetHashCode` вместе с полем.
 - [ ] 2.2.3.2. `Core/Moves/PawnMoveGenerator.cs`: генерация e.p. (проверка `board.LastMove`, двойного хода Ratnik’а, горизонтали, соседней вертикали, пустой целевой клетки).
 - [ ] 2.2.3.3. `Core/Board/ChessBoard.Moves.cs`: ветка `if (move.IsEnPassant)` **до** общей ветки:
   - снять нашу пешку с `From` (`PopPiece`);

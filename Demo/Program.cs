@@ -15,8 +15,6 @@ var from = new Position(1, 4); // e2
 var to = new Position(3, 4);   // e4
 var move = new Move(from, to);
 Console.WriteLine($"Ход: {move.From.ToAlgebraic()} -> {move.To.ToAlgebraic()}");
-var promotionMove = new Move(from, to, PieceType.Helgi);
-Console.WriteLine($"Ход с превращением: {promotionMove.From} -> {promotionMove.To}, в {promotionMove.PromotionType}");
 
 // Доска
 var board = new ChessBoard(PieceFactory.StartingPosition());
@@ -65,5 +63,18 @@ pawnBoard.SetPiece(1, 4, new Piece(PieceType.Ratnik, PieceColor.White));
 var pawnMoves = MoveGenerator.GetMovesForPiece(pawnBoard, new Position(1, 4));
 Console.WriteLine($"Белая пешка на e2 может пойти на {pawnMoves.Count} клеток:");
 foreach (var pawnMove in pawnMoves)
-    Console.WriteLine($"  {pawnMove.From.ToAlgebraic()} -> {pawnMove.To.ToAlgebraic()}" +
-                      (pawnMove.PromotionType.HasValue ? $" (превращение в {pawnMove.PromotionType})" : ""));
+    Console.WriteLine($"  {pawnMove.From.ToAlgebraic()} -> {pawnMove.To.ToAlgebraic()}");
+
+Console.WriteLine("\n=== Превращение ===");
+var promoBoard = new ChessBoard();
+promoBoard.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
+promoBoard.UpdateKingPosition(PieceColor.White, new Position(0, 4));
+promoBoard.SetPiece(new Position(7, 4), new Piece(PieceType.Volkhv, PieceColor.Black));
+promoBoard.UpdateKingPosition(PieceColor.Black, new Position(7, 4));
+promoBoard.SetPiece(new Position(6, 4),
+    new Piece(PieceType.Ratnik, PieceColor.White, PieceType.Helgi));
+
+Console.WriteLine("До: Ratnik на e7 (цель — Helgi)");
+promoBoard.MakeMove(new Move(new Position(6, 4), new Position(7, 4)));
+var promoted = promoBoard.GetTopPiece(new Position(7, 4));
+Console.WriteLine($"После: {promoted?.Type} на e8, IsPromoted={promoted?.IsPromoted}");
