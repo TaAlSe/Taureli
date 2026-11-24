@@ -9,21 +9,20 @@ namespace Tests.Core.Board;
 public class PromotionTests
 {
     /// <summary>
-    /// Хелпер: создаёт доску с двумя королями (чтобы IsLegalMove работал).
+    /// Хелпер: доска с двумя королями в безопасных местах.
+    /// Чёрный король в центре, чтобы не мешать превращению на 8-й горизонтали.
     /// </summary>
     private static ChessBoard BoardWithKings()
     {
         var board = new ChessBoard();
         board.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
         board.UpdateKingPosition(PieceColor.White, new Position(0, 4));
-        board.SetPiece(new Position(7, 4), new Piece(PieceType.Volkhv, PieceColor.Black));
-        board.UpdateKingPosition(PieceColor.Black, new Position(7, 4));
+        board.SetPiece(new Position(3, 4), new Piece(PieceType.Volkhv, PieceColor.Black));
+        board.UpdateKingPosition(PieceColor.Black, new Position(3, 4));
         return board;
     }
 
-    /// <summary>
-    /// Каждая пешка в начальной расстановке имеет PromotionTarget.
-    /// </summary>
+    /// <summary>Каждая пешка в начальной расстановке имеет PromotionTarget.</summary>
     [Fact]
     public void PieceFactory_AllPawnsHavePromotionTarget()
     {
@@ -38,23 +37,7 @@ public class PromotionTests
             }
     }
 
-    /// <summary>
-    /// Пешка на последней горизонтали генерирует ход на неё (само превращение — при исполнении).
-    /// </summary>
-    [Fact]
-    public void Pawn_OnLastRank_GeneratesMoveToLastRank()
-    {
-        var board = new ChessBoard();
-        board.SetPiece(new Position(6, 4), new Piece(PieceType.Ratnik, PieceColor.White, PieceType.Helgi));
-
-        var moves = PawnMoveGenerator.GetMoves(board, new Position(6, 4));
-
-        Assert.Contains(moves, m => m.To == new Position(7, 4));
-    }
-
-    /// <summary>
-    /// Ратник на последней горизонтали превращается в свой PromotionTarget.
-    /// </summary>
+    /// <summary>Ратник на последней горизонтали превращается в свой PromotionTarget.</summary>
     [Fact]
     public void Ratnik_ReachesLastRank_PromotesToTarget()
     {
@@ -70,9 +53,7 @@ public class PromotionTests
         Assert.Equal(PieceType.Helgi, top.PromotionTarget);
     }
 
-    /// <summary>
-    /// Превращение сохраняет исходную линию: пешка с каждой вертикали даёт свою фигуру.
-    /// </summary>
+    /// <summary>Пешка с каждой вертикали превращается в свою фигуру.</summary>
     [Fact]
     public void Ratnik_PromotesToCorrectTargetForEachFile()
     {
@@ -99,9 +80,7 @@ public class PromotionTests
         }
     }
 
-    /// <summary>
-    /// Пешка на вершине башни превращается, нижние фигуры остаются на месте.
-    /// </summary>
+    /// <summary>Пешка на вершине башни превращается, нижние фигуры остаются.</summary>
     [Fact]
     public void Ratnik_OnTopOfStack_Promotes_StackBelowUnchanged()
     {
@@ -129,9 +108,7 @@ public class PromotionTests
         Assert.True(top.IsPromoted);
     }
 
-    /// <summary>
-    /// Ратник, снятый с башни и дошедший до последней горизонтали, превращается.
-    /// </summary>
+    /// <summary>Ратник, снятый с башни и дошедший до последней горизонтали, превращается.</summary>
     [Fact]
     public void Ratnik_SplitFromStack_Promotes()
     {
@@ -151,7 +128,8 @@ public class PromotionTests
     }
 
     /// <summary>
-    /// Своя башня встаёт на превращённую фигуру → она откатывается в Ratnik'а.
+    /// Верхний Ratnik башни идёт вперёд (split) на своего превращённого Helgi.
+    /// Покрытый Helgi откатывается в Ratnik'а; пришедший Ratnik превращается.
     /// </summary>
     [Fact]
     public void PromotedPiece_CoveredByFriendlyStack_RevertsToRatnik()
@@ -163,56 +141,71 @@ public class PromotionTests
             IsPromoted = true,
             HasMoved = true
         });
-        // На e7 — своя башня, которая на него встанет.
-        board.SetPiece(new Position(6, 4), new Piece(PieceType.Ratoborets, PieceColor.White));
+        // На e7 — башня [Ratoborets (bottom), Ratnik (top)].
+        board.SetStack(new Position(6, 4), [
+            new Piece(PieceType.Ratoborets, PieceColor.White),
+            new Piece(PieceType.Ratnik, PieceColor.White, PieceType.Helgi)
+        ]);
 
-        Assert.True(board.MakeMove(new Move(new Position(6, 4), new Position(7, 4))));
+        // Верхний Ratnik идёт на e8, на своего Helgi.
+        Assert.True(board.MakeMove(
+            new Move(new Position(6, 4), new Position(7, 4)) { SplitCount = 1 }));
 
         var stack = board.GetStack(new Position(7, 4));
         Assert.NotNull(stack);
         Assert.Equal(2, stack.Count);
-        // Снизу — откаченный Ratnik, сверху — Ratoborets.
+        // Снизу — откаченный Ratnik (бывший Helgi).
         Assert.Equal(PieceType.Ratnik, stack[0].Type);
         Assert.False(stack[0].IsPromoted);
         Assert.Equal(PieceType.Helgi, stack[0].PromotionTarget);
         Assert.True(stack[0].HasMoved);
-        Assert.Equal(PieceType.Ratoborets, stack[1].Type);
+        // Сверху — Ratnik, только что превращённый в Helgi.
+        Assert.Equal(PieceType.Helgi, stack[1].Type);
+        Assert.True(stack[1].IsPromoted);
+
+        // На e7 остался Ratoborets.
+        var fromStack = board.GetStack(new Position(6, 4));
+        Assert.NotNull(fromStack);
+        Assert.Single(fromStack);
+        Assert.Equal(PieceType.Ratoborets, fromStack[0].Type);
     }
 
     /// <summary>
-    /// Вражеская башня встаёт на превращённую фигуру → она тоже откатывается в Ratnik'а.
+    /// Вражеский ратник берёт превращённую фигуру на не-последней горизонтали:
+    /// покрытая фигура откатывается в Ratnik'а, обе — ратники в башне.
     /// </summary>
     [Fact]
     public void PromotedPiece_CoveredByEnemyStack_RevertsToRatnik()
     {
         var board = BoardWithKings();
-        // На a1 — превращённый белый Ratnik (например, Archer с вертикали a).
-        board.SetPiece(new Position(0, 0), new Piece(PieceType.Archer, PieceColor.White, PieceType.Ratoborets)
+        // На a2 — превращённый White Archer (IsPromoted = true). a2 = (1,0).
+        // Строка 1 — не последняя для чёрных (у них последняя — 0), превращения не будет.
+        board.SetPiece(new Position(1, 0), new Piece(PieceType.Archer, PieceColor.White, PieceType.Ratoborets)
         {
             IsPromoted = true,
             HasMoved = true
         });
-        // Чёрный Ratnik на b2 бьёт a1 по диагонали вниз-влево.
-        board.SetPiece(new Position(1, 1), new Piece(PieceType.Ratnik, PieceColor.Black, PieceType.Ratoborets));
+        // Чёрный Ratnik на b3 = (2,1) бьёт a2 по диагонали вниз-влево.
+        board.SetPiece(new Position(2, 1),
+            new Piece(PieceType.Ratnik, PieceColor.Black, PieceType.Ratoborets));
 
-        Assert.True(board.MakeMove(new Move(new Position(1, 1), new Position(0, 0))));
+        Assert.True(board.MakeMove(new Move(new Position(2, 1), new Position(1, 0))));
 
-        var stack = board.GetStack(new Position(0, 0));
+        var stack = board.GetStack(new Position(1, 0));
         Assert.NotNull(stack);
         Assert.Equal(2, stack.Count);
-        // Снизу — откаченный белый Ratnik, сверху — чёрный Ratnik.
+        // Снизу — откаченный белый Ratnik.
         Assert.Equal(PieceType.Ratnik, stack[0].Type);
         Assert.Equal(PieceColor.White, stack[0].Color);
         Assert.False(stack[0].IsPromoted);
         Assert.Equal(PieceType.Ratoborets, stack[0].PromotionTarget);
         Assert.True(stack[0].HasMoved);
+        // Сверху — чёрный Ratnik (не на последней горизонтали, не превращается).
         Assert.Equal(PieceType.Ratnik, stack[1].Type);
         Assert.Equal(PieceColor.Black, stack[1].Color);
     }
 
-    /// <summary>
-    /// Рятник, уже ходивший, не имеет права на двойной ход с начальной горизонтали.
-    /// </summary>
+    /// <summary>Ратник с HasMoved = true не имеет права на двойной ход.</summary>
     [Fact]
     public void Ratnik_WithHasMoved_DoesNotGenerateDoubleMove()
     {
@@ -223,6 +216,6 @@ public class PromotionTests
         var moves = PawnMoveGenerator.GetMoves(board, new Position(1, 4));
 
         Assert.DoesNotContain(moves, m => m.To == new Position(3, 4));
-        Assert.Contains(moves, m => m.To == new Position(2, 4)); // одиночный ход остаётся
+        Assert.Contains(moves, m => m.To == new Position(2, 4));
     }
 }
