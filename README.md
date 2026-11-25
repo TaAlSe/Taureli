@@ -50,32 +50,33 @@ MVP десктопного приложения для игры в таврел�
 - [x] 2.2.1а — `IsPromoted` и `HasMoved` в `Piece` с документацией.
 - [x] 2.2.1б — `PawnMoveGenerator`: запрет двойного хода для ратника, который уже ходил (`!piece.HasMoved`).
 - [x] 2.2.1в — `PawnMoveGenerator`: разрешён ход на свою башню (вперёд на 1 или 2 клетки при пустой промежуточной).
+- [x] 2.2.2 — реализация превращения в `ExecuteMoveInternal`.
 
 ### 2.2.2. Превращение ратника
 
-- [ ] 2.2.2.1. `Core/Board/ChessBoard.Promotion.cs`: `TryPromote` и `RevertToRatnik`.
-- [ ] 2.2.2.2. `Core/Board/ChessBoard.Stack.cs`: `MarkMoved(Position, int)` — помечает `HasMoved = true` для верхних `movedCount` фигур через `with`.
-- [ ] 2.2.2.3. `Core/Board/ChessBoard.Moves.cs`:
-  - [ ] удалить ветку `else if (move.PromotionType.HasValue)`;
-  - [ ] откат превращённой фигуры под башней (`targetStack[^1].IsPromoted`) — **до** `ConcatStacks`;
-  - [ ] вызвать `MarkMoved(move.To, movingStack.Count)`;
-  - [ ] вызвать `TryPromote(move.To)`.
-- [ ] 2.2.2.4. `Core/Board/ChessBoard.Core.cs`: поле `public Move? LastMove { get; private set; }`; в `MakeMove` — `LastMove = move;` в конце.
-- [ ] 2.2.2.5. `Core/Moves/PawnMoveGenerator.cs`: убрать `promotionRow` и `promotionType`.
-- [ ] 2.2.2.6. `Core/Moves/MoveGenerator.cs`: в блоке split убрать проверку `move.PromotionType.HasValue` и третий аргумент `new Move(from, to)`.
-- [ ] 2.2.2.7. `Core/Moves/Move.cs`: удалить `PromotionType` (поле, параметр, `Equals`/`GetHashCode`/`ToString`); `Shift+F12` → поправить `Demo/Program.cs`, `MoveTests.cs`, `PawnMoveGeneratorTests.cs`; `Ctrl+Shift+B`.
-- [ ] 2.2.2.8. Тесты:
-  - [ ] переписать `PawnMoveGeneratorTests`;
-  - [ ] новый `Tests/Core/Board/PromotionTests.cs`:
-    - [ ] `PieceFactory_AllPawnsHavePromotionTarget`;
-    - [ ] `Ratnik_ReachesLastRank_PromotesToTarget`;
-    - [ ] `Ratnik_OnTopOfStack_Promotes_StackBelowUnchanged`;
-    - [ ] `Ratnik_SplitFromStack_Promotes`;
-    - [ ] `PromotedPiece_CoveredByFriendlyStack_RevertsToRatnik`;
-    - [ ] `PromotedPiece_CoveredByEnemyStack_RevertsToRatnik`;
-    - [ ] `RevertToRatnik_PreservesPromotionTarget`;
-    - [ ] `Ratnik_ReturnsToStartRank_LosesDoubleMove`.
-- [ ] 2.2.2.9. README: отметить 2.2.2 как выполненный.
+- [x] 2.2.2.1. `Core/Board/ChessBoard.Promotion.cs`: `TryPromote` и `RevertToRatnik`.
+- [x] 2.2.2.2. `Core/Board/ChessBoard.Stack.cs`: `MarkMoved(Position, int)` — помечает `HasMoved = true` для верхних `movedCount` фигур через `with`.
+- [x] 2.2.2.3. `Core/Board/ChessBoard.Moves.cs`:
+  - [x] удалить ветку `else if (move.PromotionType.HasValue)`;
+  - [x] откат превращённой фигуры под башней (`targetStack[^1].IsPromoted`) — **до** `ConcatStacks`;
+  - [x] вызвать `MarkMoved(move.To, movingStack.Count)`;
+  - [x] вызвать `TryPromote(move.To)`.
+- [x] 2.2.2.4. `Core/Board/ChessBoard.Core.cs`: поле `public Move? LastMove { get; private set; }`; в `MakeMove` — `LastMove = move;` в конце.
+- [x] 2.2.2.5. `Core/Moves/PawnMoveGenerator.cs`: убрать `promotionRow` и `promotionType`.
+- [x] 2.2.2.6. `Core/Moves/MoveGenerator.cs`: в блоке split убрать проверку `move.PromotionType.HasValue` и третий аргумент `new Move(from, to)`.
+- [x] 2.2.2.7. `Core/Moves/Move.cs`: удалить `PromotionType` (поле, параметр, `Equals`/`GetHashCode`/`ToString`); `Shift+F12` → поправить `Demo/Program.cs`, `MoveTests.cs`, `PawnMoveGeneratorTests.cs`; `Ctrl+Shift+B`.
+- [x] 2.2.2.8. Тесты:
+  - [x] переписать `PawnMoveGeneratorTests`;
+  - [x] новый `Tests/Core/Board/PromotionTests.cs`:
+    - [x] `PieceFactory_AllPawnsHavePromotionTarget`;
+    - [x] `Ratnik_ReachesLastRank_PromotesToTarget`;
+    - [x] `Ratnik_OnTopOfStack_Promotes_StackBelowUnchanged`;
+    - [x] `Ratnik_SplitFromStack_Promotes`;
+    - [x] `PromotedPiece_CoveredByFriendlyStack_RevertsToRatnik`;
+    - [x] `PromotedPiece_CoveredByEnemyStack_RevertsToRatnik`;
+    - [x] `RevertToRatnik_PreservesPromotionTarget`;
+    - [x] `Ratnik_ReturnsToStartRank_LosesDoubleMove`.
+- [x] 2.2.2.9. README: отметить 2.2.2 как выполненный.
 
 > **Примечание:** 2.2.4 «Превращение при разделении башни» из старого плана поглощается 2.2.2 — автоматическое превращение верхней фигуры работает и при split, отдельный пункт не нужен.
 

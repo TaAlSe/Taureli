@@ -81,20 +81,59 @@ public partial class ChessBoard
 
     public override string ToString()
     {
-        // Пока используем старые методы для отображения
+        const int cellWidth = 5; // место под "PX2* " — макс. 3 символа + суффикс + пробел
         var sb = new System.Text.StringBuilder();
+
         for (int row = Size - 1; row >= 0; row--)
         {
             sb.Append(row + 1).Append("  ");
             for (int col = 0; col < Size; col++)
             {
                 var pos = new Position(row, col);
-                var piece = GetTopPiece(pos);
-                sb.Append(piece == null ? ".  " : piece.GetDebugCode() + " ");
+                var stack = GetStack(pos);
+
+                if (stack == null || stack.Count == 0)
+                {
+                    sb.Append('.', 1).Append(' ', cellWidth - 1);
+                    continue;
+                }
+
+                var top = stack[^1];
+                var code = top.GetDisplayCode();              // "PX" / "R*" / "v" ...
+                var height = stack.Count > 1
+                    ? stack.Count.ToString()
+                    : "";
+                var cell = code + height;                      // "PX2", "R*", "v"
+                sb.Append(cell);
+                sb.Append(' ', Math.Max(1, cellWidth - cell.Length));
             }
             sb.AppendLine();
         }
-        sb.AppendLine("   a  b  c  d  e  f  g  h");
+
+        sb.Append("   ");
+        for (int col = 0; col < Size; col++)
+            sb.Append((char)('a' + col)).Append("    ");
+        sb.AppendLine();
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Возвращает пошаговый дамп всех непустых стеков — для отладки.
+    /// Формат: «клетка: [снизу → вверху]».
+    /// </summary>
+    public string DumpStacks()
+    {
+        var sb = new System.Text.StringBuilder();
+        for (int row = Size - 1; row >= 0; row--)
+            for (int col = 0; col < Size; col++)
+            {
+                var pos = new Position(row, col);
+                var stack = GetStack(pos);
+                if (stack is null or { Count: 0 }) continue;
+
+                var pieces = string.Join(", ", stack.Select(p => p.GetDisplayCode()));
+                sb.AppendLine($"{pos.ToAlgebraic()}: [{pieces}]");
+            }
         return sb.ToString();
     }
 
@@ -105,5 +144,4 @@ public partial class ChessBoard
     {
         return color == PieceColor.White ? WhiteKingPosition : BlackKingPosition;
     }
-
 }

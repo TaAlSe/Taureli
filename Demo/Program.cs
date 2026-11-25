@@ -78,3 +78,22 @@ Console.WriteLine("До: Ratnik на e7 (цель — Helgi)");
 promoBoard.MakeMove(new Move(new Position(6, 4), new Position(7, 4)));
 var promoted = promoBoard.GetTopPiece(new Position(7, 4));
 Console.WriteLine($"После: {promoted?.Type} на e8, IsPromoted={promoted?.IsPromoted}");
+
+Console.WriteLine("\n=== Башня ===");
+var stackBoard = new ChessBoard();
+stackBoard.SetPiece(new Position(0, 4), new Piece(PieceType.Volkhv, PieceColor.White));
+stackBoard.UpdateKingPosition(PieceColor.White, new Position(0, 4));
+stackBoard.SetPiece(new Position(7, 4), new Piece(PieceType.Volkhv, PieceColor.Black));
+stackBoard.UpdateKingPosition(PieceColor.Black, new Position(7, 4));
+
+// Башня из 3 фигур на d4: снизу Ratoborets, посередине Horseman, сверху Ratnik.
+stackBoard.SetStack(new Position(3, 3), [
+    new Piece(PieceType.Ratoborets, PieceColor.White),
+    new Piece(PieceType.Horseman,   PieceColor.White),
+    new Piece(PieceType.Ratnik,     PieceColor.White, PieceType.Helgi)
+]);
+
+Console.WriteLine(stackBoard.ToString());
+
+Console.WriteLine("\n=== Дамп стеков ===");
+Console.WriteLine(stackBoard.DumpStacks());
